@@ -312,8 +312,9 @@ class ExpenseHandler(webapp2.RequestHandler):
         return """<html><body>
     <h1>New Expense for '%s'</h1>
     <form action="%s" method="post">
-        <div>Expense: <input type="text" name="desc"/></div>
-        <div>Cost: $<input type="text" name="value"/></div>
+        <div>Expense: <input type="text" name="desc"/>*</div>
+        <div>Cost: $<input type="text" name="value"/>*</div>
+        <div>Date: <input type="text" name="expensedate"/></div>
         %s
         <div><input type="submit" value="Create Expense"/></div>
     </form>
@@ -370,6 +371,12 @@ class ExpenseHandler(webapp2.RequestHandler):
                     value=int(value),
                     currency="USD",
                 )
+                
+                # get the expense date
+                expense_date = dateparse(self.request.get('expensedate'))
+                expense.expense_date = expense_date.date()
+                
+                # TODO: get the right travelers and payer
                 expense.travelers = ['Matt', 'Christy']
                 expense.payer = user.nickname()
                 expense.put()
