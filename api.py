@@ -12,10 +12,14 @@ import json
 from google.appengine.api import users
 from google.appengine.ext import db
 
+# Deps
+from deps.dateutil.parser import parse as dateparse
+
 # Local
 from models import Trip, Expense
 from infra.jsonextension import GqlEncoder
 from infra.authz import Authz, PermissionError
+from config import Config
 
 class TripListHandler(webapp2.RequestHandler):
     def get(self):
@@ -88,9 +92,17 @@ class TripHandler(webapp2.RequestHandler):
         return """<html><body>
     <h1>New Trip</h1>
     <form action="%s" method="post">
-        <div>Trip Name: <input type="text" name="name"/></div>
-        <div>Trip Password: <input type="text" name="password"/></div>
+        <div>Trip Name: <input type="text" name="name"/>*</div>
+        <div>Trip Password: <input type="text" name="password"/>*</div>
+        <div>Start Date: <input type="text" name="startdate"/></div>
+        <div>End Date: <input type="text" name="enddate"/></div>
         <ul>
+        <li>Traveler: <input type="text" name="traveler"/></li>
+        <li>Traveler: <input type="text" name="traveler"/></li>
+        <li>Traveler: <input type="text" name="traveler"/></li>
+        <li>Traveler: <input type="text" name="traveler"/></li>
+        <li>Traveler: <input type="text" name="traveler"/></li>
+        <li>Traveler: <input type="text" name="traveler"/></li>
         <li>Traveler: <input type="text" name="traveler"/></li>
         <li>Traveler: <input type="text" name="traveler"/></li>
         <li>Traveler: <input type="text" name="traveler"/></li>
@@ -140,13 +152,23 @@ class TripHandler(webapp2.RequestHandler):
                             password=password,
                             owner=user)
                 
-                #TODO: count how many travelers are requested, cap at 10
+                # get traveler names
                 raw_travelers = self.request.get_all("traveler")
+                if len(raw_travelers) > Config.limits.travelers_per_trip:
+                    logging.warning('Attempt to add too many travelers: %s', user.nickname)
+                    raw_travelers = raw_travelers[:Config.limits.travelers_per_trip]
                 travelers = []
                 for traveler in raw_travelers:
                     if traveler.strip() != "":
                         travelers.append(traveler.strip())
                 trip.travelers = travelers
+                
+                # get dates
+                start_date = dateparse(self.request.get('startdate'))
+                end_date = dateparse(self.request.get('enddate'))
+                trip.start_date = start_date.date()
+                trip.end_date = end_date.date()
+                
                 trip.put()
                 
                 output = json.dumps({"key":"%s" % trip.key()})
