@@ -11,11 +11,11 @@ handlers:
 
 - url: /api/.+
   script: api.app
-  login: required
+  login: admin
 
 - url: /.+
   script: main.app
-  login: required
+  login: admin
 
 - url: /
   script: home.app
