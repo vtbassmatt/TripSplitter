@@ -6,7 +6,6 @@
 import webapp2
 from google.appengine.api import users
 from google.appengine.ext import db
-from models import Trip, Expense
 
 class RootHandler(webapp2.RequestHandler):
     def get(self, path):
