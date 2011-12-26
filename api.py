@@ -302,6 +302,11 @@ class ExpenseHandler(webapp2.RequestHandler):
     def _form_html(self, trip):
         """Scaffolding - allows creating a new expense"""
         post_url = webapp2.uri_for('expense', trip_key=trip.key(), expense_key='new')
+        
+        traveler_dropdown_src = """<option value="%s">%s</option>"""
+        traveler_dropdown = "".join(
+            [traveler_dropdown_src % (str,str) for str in trip.travelers])
+        
         traveler_checkboxes_src = """        <div>
             <input type="checkbox" name="traveler" value="%s" checked>
             <label for="traveler">%s</label>
@@ -315,11 +320,14 @@ class ExpenseHandler(webapp2.RequestHandler):
         <div>Expense: <input type="text" name="desc"/>*</div>
         <div>Cost: $<input type="text" name="value"/>*</div>
         <div>Date: <input type="text" name="expensedate"/></div>
+        <div>Payer: <select name="payer">%s</select>*</div>
+        <div>Consumers:
         %s
+        </div>
         <div><input type="submit" value="Create Expense"/></div>
     </form>
 </body></html>
-            """ % (trip.name, post_url, traveler_checkboxes)
+            """ % (trip.name, post_url, traveler_dropdown, traveler_checkboxes)
     
     def post(self, trip_key, expense_key):
         errors = []
@@ -359,9 +367,10 @@ class ExpenseHandler(webapp2.RequestHandler):
         # having passed authz, let's try creating the expense
         desc = self.request.get('desc')
         value = self.request.get('value')
+        payer = self.request.get('payer')
 
-        if desc == "" or value == "":
-            errors.append({"message":"Description name and value are required."})
+        if desc == "" or value == "" or payer == "":
+            errors.append({"message":"Description name, value, and payer are required."})
         else:            
             try:
                 expense = Expense(
@@ -376,9 +385,12 @@ class ExpenseHandler(webapp2.RequestHandler):
                 expense_date = dateparse(self.request.get('expensedate'))
                 expense.expense_date = expense_date.date()
                 
-                # TODO: get the right travelers and payer
+                # TODO: get the right travelers
                 expense.travelers = ['Matt', 'Christy']
-                expense.payer = user.nickname()
+                
+                # TODO: ensure the payer is actually a traveler
+                expense.payer = payer
+                
                 expense.put()
                 
                 output = json.dumps({"key":"%s" % expense.key()})
