@@ -164,6 +164,7 @@ class TripHandler(webapp2.RequestHandler):
                 trip.travelers = travelers
                 
                 # get dates
+                # TODO: validation that these dates are sane and properly ordered
                 start_date = dateparse(self.request.get('startdate'))
                 end_date = dateparse(self.request.get('enddate'))
                 trip.start_date = start_date.date()
