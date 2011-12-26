@@ -368,9 +368,12 @@ class ExpenseHandler(webapp2.RequestHandler):
         desc = self.request.get('desc')
         value = self.request.get('value')
         payer = self.request.get('payer')
+        travelers = self.request.get_all('traveler')
 
         if desc == "" or value == "" or payer == "":
             errors.append({"message":"Description name, value, and payer are required."})
+        elif len(travelers) == 0:
+            errors.append({"message":"At least one person must be specified as a traveler."})
         else:            
             try:
                 expense = Expense(
@@ -385,8 +388,8 @@ class ExpenseHandler(webapp2.RequestHandler):
                 expense_date = dateparse(self.request.get('expensedate'))
                 expense.expense_date = expense_date.date()
                 
-                # TODO: get the right travelers
-                expense.travelers = ['Matt', 'Christy']
+                # TODO: make sure these travelers are actually on the trip
+                expense.travelers = travelers
                 
                 # TODO: ensure the payer is actually a traveler
                 expense.payer = payer
