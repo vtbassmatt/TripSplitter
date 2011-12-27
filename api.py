@@ -329,6 +329,9 @@ class ExpenseHandler(webapp2.RequestHandler):
             
         self.response.out.write(output)
     
+    #def put(self, trip_key):
+    #    TODO: allow updates
+    #    pass
 
 
 app = webapp2.WSGIApplication([
