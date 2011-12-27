@@ -23,7 +23,7 @@ class ScaffoldHandler(webapp2.RequestHandler):
     
     def _tripScaffold(self):
         """Scaffolding - allows creating a new trip"""
-        post_url = '/api/trip/new'
+        post_url = '/api/trip'
         return """<html><body>
     <h2>New Trip</h2>
     <form action="%s" method="post">
@@ -58,7 +58,7 @@ class ScaffoldHandler(webapp2.RequestHandler):
         
     def _expenseScaffoldInternal(self, trip):
         """Scaffolding - allows creating a new expense"""
-        post_url = '/api/trip/%s/expense/new' % trip.key()
+        post_url = '/api/trip/%s/expense' % trip.key()
         
         traveler_dropdown_src = """<option value="%s">%s</option>"""
         traveler_dropdown = "".join(

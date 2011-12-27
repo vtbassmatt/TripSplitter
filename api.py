@@ -45,40 +45,7 @@ class TripListHandler(webapp2.RequestHandler):
         self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
 
-class TripHandler(webapp2.RequestHandler):
-    def get(self, trip_key):
-        
-        errors = []
-        output = ""
-        user = users.get_current_user()
-        authz = Authz(user)
-        self.response.headers["Content-type"] = "application/json"
-
-        try:
-            # get the trip
-            trip = Trip.get(trip_key)
-            
-            # verify the user is authorized to read the trip
-            authz.readTrip(trip)
-            
-            # format trip data
-            output = GqlEncoder().encode(trip)
-                
-        except db.BadKeyError:
-            errors.append({"message":"Invalid trip key"})
-        except PermissionError:
-            errors.append({"message":"You are not authorized to view that trip"})            
-        except Exception as e:
-            logging.exception(e)
-            errors.append({"message":"Unexpected error loading trip"})
-        
-        if len(errors) > 0:
-            output = json.dumps({"error":errors})
-            
-        self.response.out.write(output)
-
-    
-    def post(self, trip_key):
+    def post(self):
 
         errors = []
         output = ""
@@ -91,11 +58,7 @@ class TripHandler(webapp2.RequestHandler):
         try:
             # user allowed to create trips?
             authz.createTrip()
-            
-            #TODO: allow updates
-            if trip_key != 'new':
-                raise PermissionError("Updates are not allowed; must create a new trip")
-            
+                        
         except PermissionError as e:
             # this permission error could have come from authz or locally
             errors.append({"message":e.args})
@@ -148,6 +111,43 @@ class TripHandler(webapp2.RequestHandler):
         self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
 
+class TripHandler(webapp2.RequestHandler):
+    def get(self, trip_key):
+        
+        errors = []
+        output = ""
+        user = users.get_current_user()
+        authz = Authz(user)
+        self.response.headers["Content-type"] = "application/json"
+
+        try:
+            # get the trip
+            trip = Trip.get(trip_key)
+            
+            # verify the user is authorized to read the trip
+            authz.readTrip(trip)
+            
+            # format trip data
+            output = GqlEncoder().encode(trip)
+                
+        except db.BadKeyError:
+            errors.append({"message":"Invalid trip key"})
+        except PermissionError:
+            errors.append({"message":"You are not authorized to view that trip"})            
+        except Exception as e:
+            logging.exception(e)
+            errors.append({"message":"Unexpected error loading trip"})
+        
+        if len(errors) > 0:
+            output = json.dumps({"error":errors})
+            
+        self.response.out.write(output)
+
+    #def put(self, trip_key):
+    #    TODO: allow updates
+    #    pass
+    
+
 class ExpenseListHandler(webapp2.RequestHandler):
     def get(self, trip_key):
 
@@ -196,6 +196,80 @@ class ExpenseListHandler(webapp2.RequestHandler):
         self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
 
+    def post(self, trip_key):
+        errors = []
+        output = ""
+        user = users.get_current_user()
+        authz = Authz(user)
+        self.response.headers["Content-type"] = "application/json"
+
+        # check for authorization to create expenses for this trip & verify this
+        # is in fact a request to create a new expense
+        try:
+            # get the trip
+            trip = Trip.get(trip_key)
+            
+            # verify the user is authorized to create an expense on this trip
+            authz.createExpense(trip)
+            
+        except PermissionError as e:
+            # this permission error could have come from authz or locally
+            errors.append({"message":e.args})
+        except db.BadKeyError:
+            errors.append({"message":"Invalid trip key"})
+        except Exception as e:
+            logging.exception(e)
+            errors.append({"message":"Unexpected error loading trip"})
+        
+        # bail if we hit authz errors        
+        if len(errors) > 0:
+            output = json.dumps({"error":errors})
+            self.response.out.write(output)
+            return
+
+        # having passed authz, let's try creating the expense
+        desc = self.request.get('desc')
+        value = self.request.get('value')
+        payer = self.request.get('payer')
+        travelers = self.request.get_all('traveler')
+
+        if desc == "" or value == "" or payer == "":
+            errors.append({"message":"Description name, value, and payer are required."})
+        elif len(travelers) == 0:
+            errors.append({"message":"At least one person must be specified as a traveler."})
+        else:            
+            try:
+                expense = Expense(
+                    parent=trip.key(),
+                    creator=user,
+                    description=desc,
+                    value=int(value),
+                    currency="USD",
+                )
+                
+                # get the expense date
+                expense_date = dateparse(self.request.get('expensedate'))
+                expense.expense_date = expense_date.date()
+                
+                # TODO: make sure these travelers are actually on the trip
+                expense.travelers = travelers
+                
+                # TODO: ensure the payer is actually a traveler
+                expense.payer = payer
+                
+                expense.put()
+                
+                output = json.dumps({"key":"%s" % expense.key()})
+            except Exception as e:
+                logging.exception(e)
+                errors.append({"message":"Unexpected error creating expense"})
+        
+        if len(errors) > 0:
+            output = json.dumps({"error":errors})
+
+        self.response.headers["Content-type"] = "application/json"
+        self.response.out.write(output)
+        
 class ExpenseHandler(webapp2.RequestHandler):
     def get(self, trip_key, expense_key):
         
@@ -255,83 +329,7 @@ class ExpenseHandler(webapp2.RequestHandler):
             
         self.response.out.write(output)
     
-    def post(self, trip_key, expense_key):
-        errors = []
-        output = ""
-        user = users.get_current_user()
-        authz = Authz(user)
-        self.response.headers["Content-type"] = "application/json"
 
-        # check for authorization to create expenses for this trip & verify this
-        # is in fact a request to create a new expense
-        try:
-            # get the trip
-            trip = Trip.get(trip_key)
-            
-            # verify the user is authorized to create an expense on this trip
-            authz.createExpense(trip)
-            
-            #TODO: allow updates
-            if expense_key != 'new':
-                raise PermissionError("Updates are not allowed; must create a new expense")
-            
-        except PermissionError as e:
-            # this permission error could have come from authz or locally
-            errors.append({"message":e.args})
-        except db.BadKeyError:
-            errors.append({"message":"Invalid trip key"})
-        except Exception as e:
-            logging.exception(e)
-            errors.append({"message":"Unexpected error loading trip"})
-        
-        # bail if we hit authz errors        
-        if len(errors) > 0:
-            output = json.dumps({"error":errors})
-            self.response.out.write(output)
-            return
-
-        # having passed authz, let's try creating the expense
-        desc = self.request.get('desc')
-        value = self.request.get('value')
-        payer = self.request.get('payer')
-        travelers = self.request.get_all('traveler')
-
-        if desc == "" or value == "" or payer == "":
-            errors.append({"message":"Description name, value, and payer are required."})
-        elif len(travelers) == 0:
-            errors.append({"message":"At least one person must be specified as a traveler."})
-        else:            
-            try:
-                expense = Expense(
-                    parent=trip.key(),
-                    creator=user,
-                    description=desc,
-                    value=int(value),
-                    currency="USD",
-                )
-                
-                # get the expense date
-                expense_date = dateparse(self.request.get('expensedate'))
-                expense.expense_date = expense_date.date()
-                
-                # TODO: make sure these travelers are actually on the trip
-                expense.travelers = travelers
-                
-                # TODO: ensure the payer is actually a traveler
-                expense.payer = payer
-                
-                expense.put()
-                
-                output = json.dumps({"key":"%s" % expense.key()})
-            except Exception as e:
-                logging.exception(e)
-                errors.append({"message":"Unexpected error creating expense"})
-        
-        if len(errors) > 0:
-            output = json.dumps({"error":errors})
-
-        self.response.headers["Content-type"] = "application/json"
-        self.response.out.write(output)
 
 app = webapp2.WSGIApplication([
     webapp2.Route(r'/api/trip',
