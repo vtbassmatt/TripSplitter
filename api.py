@@ -54,64 +54,29 @@ class TripHandler(webapp2.RequestHandler):
         authz = Authz(user)
         self.response.headers["Content-type"] = "application/json"
 
-        if trip_key == "new":
-            self.response.headers["Content-type"] = "text/html"
-            try:
-                authz.createTrip()
-                output = self._form_html()
-            except PermissionError:
-                output = "You are not authorized to create trips."
-
-        else:
-            try:
-                # get the trip
-                trip = Trip.get(trip_key)
+        try:
+            # get the trip
+            trip = Trip.get(trip_key)
+            
+            # verify the user is authorized to read the trip
+            authz.readTrip(trip)
+            
+            # format trip data
+            output = GqlEncoder().encode(trip)
                 
-                # verify the user is authorized to read the trip
-                authz.readTrip(trip)
-                
-                # format trip data
-                output = GqlEncoder().encode(trip)
-                    
-            except db.BadKeyError:
-                errors.append({"message":"Invalid trip key"})
-            except PermissionError:
-                errors.append({"message":"You are not authorized to view that trip"})            
-            except Exception as e:
-                logging.exception(e)
-                errors.append({"message":"Unexpected error loading trip"})
+        except db.BadKeyError:
+            errors.append({"message":"Invalid trip key"})
+        except PermissionError:
+            errors.append({"message":"You are not authorized to view that trip"})            
+        except Exception as e:
+            logging.exception(e)
+            errors.append({"message":"Unexpected error loading trip"})
         
         if len(errors) > 0:
             output = json.dumps({"error":errors})
             
         self.response.out.write(output)
-    
-    def _form_html(self):
-        """Scaffolding - allows creating a new trip"""
-        post_url = webapp2.uri_for('trip', trip_key='new')
-        return """<html><body>
-    <h1>New Trip</h1>
-    <form action="%s" method="post">
-        <div>Trip Name: <input type="text" name="name"/>*</div>
-        <div>Trip Password: <input type="text" name="password"/>*</div>
-        <div>Start Date: <input type="text" name="startdate"/></div>
-        <div>End Date: <input type="text" name="enddate"/></div>
-        <ul>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        </ul>
-        <div><input type="submit" value="Create Trip"/></div>
-    </form>
-</body></html>
-            """ % (post_url,)
+
     
     def post(self, trip_key):
 
@@ -262,72 +227,33 @@ class ExpenseHandler(webapp2.RequestHandler):
             self.response.out.write(output)
             return
 
-        # next, figure out whether this is a new expense or a read
-        if expense_key == "new":
-            self.response.headers["Content-type"] = "text/html"
-            try:
-                authz.createExpense(trip)
-                output = self._form_html(trip)
-            except PermissionError:
-                output = "You are not authorized to create expenses."
 
-        else:
-            # this is a read of an existing expense
-            # instead of directly authorizing the read of an expense, we
-            # ensure that the expense is tied to the specified trip
-            try:
-                # get the expense
-                expense = Expense.get(expense_key)
+        # this is a read of an existing expense
+        # instead of directly authorizing the read of an expense, we
+        # ensure that the expense is tied to the specified trip
+        try:
+            # get the expense
+            expense = Expense.get(expense_key)
+            
+            # ensure the expense belongs to the trip
+            if expense.parent_key() != trip.key():
+                raise PermissionError("Expense is not tied to that trip")
+            
+            # format expense data
+            output = GqlEncoder().encode(expense)
                 
-                # ensure the expense belongs to the trip
-                if expense.parent_key() != trip.key():
-                    raise PermissionError("Expense is not tied to that trip")
-                
-                # format expense data
-                output = GqlEncoder().encode(expense)
-                    
-            except db.BadKeyError:
-                errors.append({"message":"Invalid expense key"})
-            except PermissionError as e:
-                errors.append({"message":e.args})
-            except Exception as e:
-                logging.exception(e)
-                errors.append({"message":"Unexpected error loading expense"})
+        except db.BadKeyError:
+            errors.append({"message":"Invalid expense key"})
+        except PermissionError as e:
+            errors.append({"message":e.args})
+        except Exception as e:
+            logging.exception(e)
+            errors.append({"message":"Unexpected error loading expense"})
 
         if len(errors) > 0:
             output = json.dumps({"error":errors})
             
         self.response.out.write(output)
-    
-    def _form_html(self, trip):
-        """Scaffolding - allows creating a new expense"""
-        post_url = webapp2.uri_for('expense', trip_key=trip.key(), expense_key='new')
-        
-        traveler_dropdown_src = """<option value="%s">%s</option>"""
-        traveler_dropdown = "".join(
-            [traveler_dropdown_src % (str,str) for str in trip.travelers])
-        
-        traveler_checkboxes_src = """        <div>
-            <input type="checkbox" name="traveler" value="%s" checked>
-            <label for="traveler">%s</label>
-        </div>"""
-        traveler_checkboxes = "".join(
-            [traveler_checkboxes_src % (str,str) for str in trip.travelers])
-        
-        return """<html><body>
-    <h1>New Expense for '%s'</h1>
-    <form action="%s" method="post">
-        <div>Expense: <input type="text" name="desc"/>*</div>
-        <div>Cost: $<input type="text" name="value"/>*</div>
-        <div>Date: <input type="text" name="expensedate"/></div>
-        <div>Payer: <select name="payer">%s</select>*</div>
-        <div>Consumers:
-        %s
-        </div>
-        <div><input type="submit" value="Create Expense"/></div>
-    </form>
-</body></html>
-            """ % (trip.name, post_url, traveler_dropdown, traveler_checkboxes)
     
     def post(self, trip_key, expense_key):
         errors = []
