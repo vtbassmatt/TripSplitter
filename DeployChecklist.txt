@@ -1,0 +1,5 @@
+DEPLOY CHECKLIST:
+-----------------
+
+1) Update version number in app.yaml
+2) Verify config.py is using *-min.js libraries

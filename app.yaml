@@ -17,6 +17,11 @@ handlers:
   script: scaffold.app
   login: admin
 
+- url: /static
+  static_dir: static
+  login: required
+  auth_fail_action: unauthorized
+
 - url: /.+
   script: main.app
   login: admin
