@@ -3,11 +3,12 @@
 # (C) 2011 Matt Cooper <vtbassmatt@gmail.com>
 # TripSplitter Main Webapp
 
-import webapp2
-#from google.appengine.api import users
-#from google.appengine.ext import db
-import jinja2
 import os
+
+import webapp2
+import jinja2
+
+from config import Config
 
 jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'))
@@ -23,10 +24,37 @@ class RootHandler(webapp2.RequestHandler):
         self.response.out.write('</body></html>')
 
 class AppHandler(webapp2.RequestHandler):
+    def __init__(self, request, response):
+        # set self.request, self.response, and self.app
+        # per the webapp2 documentation
+        self.initialize(request, response)
+        
+        # figure out the appropriate scripts to include
+        (use_min, static_dir) = (Config.app.use_min, Config.app.static_dir)
+        underscore = 'underscore'
+        backbone = 'backbone'
+        if use_min:
+            underscore += '-min'
+            backbone += '-min'
+        underscore += '.js'
+        backbone += '.js'
+        
+        # build the template_scripts object
+        self.template_scripts = {
+            'underscore_js': static_dir + underscore,
+            'jquery_js': static_dir + 'jquery-1.7.1.min.js',
+            'json2_js': static_dir + 'json2.js',
+            'backbone_js': static_dir + backbone,
+            'tripsplitter_js': static_dir + 'tripsplitter.js',
+        }
+    
     def get(self):
         template_values = {
             'test': 'test!',
         }
+        # add appropriate scripts to the template vars
+        template_values.update(self.template_scripts)
+        
         template = jinja_environment.get_template('index.html')
         self.response.out.write(template.render(template_values))
 
