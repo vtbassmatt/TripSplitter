@@ -4,8 +4,13 @@
 # TripSplitter Main Webapp
 
 import webapp2
-from google.appengine.api import users
-from google.appengine.ext import db
+#from google.appengine.api import users
+#from google.appengine.ext import db
+import jinja2
+import os
+
+jinja_environment = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__) + '/templates'))
 
 class RootHandler(webapp2.RequestHandler):
     def get(self, path):
@@ -17,6 +22,15 @@ class RootHandler(webapp2.RequestHandler):
         self.response.out.write('<p>Try <a href="/api/trip">the API instead</a>.</p>')
         self.response.out.write('</body></html>')
 
+class AppHandler(webapp2.RequestHandler):
+    def get(self):
+        template_values = {
+            'test': 'test!',
+        }
+        template = jinja_environment.get_template('index.html')
+        self.response.out.write(template.render(template_values))
+
 app = webapp2.WSGIApplication([
+    webapp2.Route(r'/app', handler=AppHandler),
     webapp2.Route(r'/<path>', handler=RootHandler),
         ], debug=True)

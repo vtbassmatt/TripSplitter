@@ -7,3 +7,6 @@ Thanks to:
 - DocumentCloud's Backbone.js (1.5.3) and Underscore.js (1.2.3)
 - Douglas Crockford's json2.js (2011-10-19)
 - JQuery (1.7.1)
+- Jinja2 (2.6)
+- MarkupSafe (0.15)
+- setuptools (0.6c11)

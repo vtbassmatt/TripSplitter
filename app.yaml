@@ -28,3 +28,11 @@ handlers:
 
 - url: /
   script: home.app
+
+libraries:
+- name: jinja2
+  version: "2.6"
+- name: markupsafe
+  version: "0.15"
+- name: setuptools
+  version: "0.6c11"
