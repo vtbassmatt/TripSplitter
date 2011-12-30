@@ -12,7 +12,7 @@ class MainHandler(webapp2.RequestHandler):
         
         if user:
             greeting = "Hello %s" % user.nickname()
-            see_trips = '<a href="/api/trip">See trips in the API</a>'
+            see_trips = '<a href="/app">Go to the app</a>'
             login_link = '<a href="%s">%s</a>' % (users.create_logout_url("/"), "Log out")
         else:
             greeting = "Hello."
