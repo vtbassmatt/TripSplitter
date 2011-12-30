@@ -25,7 +25,8 @@ class GqlEncoder(json.JSONEncoder):
             output = {}
             for field, value in properties:
                 output[field] = getattr(obj, field)
-            output["key"] = "%s" % obj.key()
+            # TODO: figure out how to make Backbone.js accept 'key' instead of 'id'
+            output["id"] = "%s" % obj.key()
             return output
         
         elif isinstance(obj, datetime.datetime):

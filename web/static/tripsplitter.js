@@ -1,79 +1,66 @@
-var TripApplication = function() {
+window.Trip = Backbone.Model.extend();
+
+window.TripCollection = Backbone.Collection.extend({
+    model: Trip,
+    url: '/api/trip'
+});
+
+window.TripListView = Backbone.View.extend({
+    el: $('#tripList'),
+    initialize: function() {
+        console.log('TripListView::initialize');
+        this.model.bind('reset', this.render, this);
+    },
+    render: function(eventName) {
+        console.log('TripListView::render');
+        _.each(this.model.models, function(trip) {
+            $(this.el).append(new TripListItemView({model: trip}).render().el);
+        }, this);
+        return this;
+    }
+});
+
+window.TripListItemView = Backbone.View.extend({
+    tagName: "li",
+    template: _.template($('#trip-list-item').html()),
+    render: function(eventName) {
+        console.log('TripListItemView::render');
+        $(this.el).html(this.template(this.model.toJSON()));
+        return this;
+    }
+});
+
+window.TripView = Backbone.View.extend({
+    el: $('#mainArea'),
+    template: _.template($('#trip-details').html()),
+    render: function(eventName) {
+        console.log('TripView::render');
+        $(this.el).html(this.template(this.model.toJSON()));
+        return this;
+    }
+});
+
+var AppRouter = Backbone.Router.extend({
+    routes: {
+        ""              : "list",
+        "trips/:id"      : "tripDetails"
+    },
     
-    var Trip = Backbone.Model.extend({
-        defaults: {
-            "key": "new",
-            "name": "New Trip",
-            //"start_date": null,
-            //"end_date": null,
-            //"travelers": ["you"],
-            "password": "travelisfun!"
-        }
-    });
+    list: function() {
+        console.log('list');
+        this.tripList = new TripCollection();
+        this.tripListView = new TripListView({model: this.tripList});
+        this.tripList.fetch();
+    },
     
-    var TripList = Backbone.Collection.extend({
-        model: Trip,
-        url: "/trip"
-    });
-    
-    var Trips = new TripList([
-        {"name": "Hawaii"},
-        {"name": "California"}
-    ]);
-    
-    var AppView = Backbone.View.extend({
-        el: $("body"),
-        events: {
-            "click #new-trip": "showPrompt"
-        },
-        showPrompt: function() {
-            var trip_name = prompt("Name your trip!");
-            Trips.add(new Trip({"name": trip_name}));
-        }
-    });
-    
-    var TripView = Backbone.View.extend({
-        model: new Trip,
-        tagName: "li",
-        render: function() {
-            $(this.el).html(this.model.get('name'));
-            return this;
-        }
-    });
-    
-    var TripListView = Backbone.View.extend({
-        el: $("#trip-list"),
-        initialize: function() {
-            var that = this;
-            this._tripViews = [];
-            this.collection.each(function(trip) {
-                that._tripViews.push(new TripView({
-                    model: trip
-                }));
-            });
-        },
-        render: function() {
-            var that = this;
-            $(this.el).empty();
-            _(this._tripViews).each(function(dv) {
-                $(that.el).append(dv.render().el);
-            });
-            return this;
-        }
-    });
-    
-    var appView = new AppView;
-    var tripsView = new TripListView({
-        collection: Trips
-    });
-    tripsView.render();
-    
-    // uncomment these for debugging
-    //return {
-    //    "Trip": Trip,
-    //    "Trips": Trips,
-    //    "appView": appView,
-    //    "tripsView": tripsView
-    //};
-    
-};
+    tripDetails: function(id) {
+        console.log('tripDetails(' + id + ')');
+        this.trip = this.tripList.get(id);
+        this.tripView = new TripView({model: this.trip});
+        this.tripView.render();
+    }
+});
+
+var app = new AppRouter();
+Backbone.history.start();
+

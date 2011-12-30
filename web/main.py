@@ -39,21 +39,22 @@ class AppHandler(webapp2.RequestHandler):
         underscore += '.js'
         backbone += '.js'
         
-        # build the template_scripts object
-        self.template_scripts = {
+        # build the template_boilerplate object
+        self.template_boilerplate = {
             'underscore_js': static_dir + underscore,
             'jquery_js': static_dir + 'jquery-1.7.1.min.js',
             'json2_js': static_dir + 'json2.js',
             'backbone_js': static_dir + backbone,
             'tripsplitter_js': static_dir + 'tripsplitter.js',
+            'index_css': static_dir + 'index.css',
         }
     
     def get(self):
         template_values = {
-            'test': 'test!',
+        #    'test': 'test!',
         }
-        # add appropriate scripts to the template vars
-        template_values.update(self.template_scripts)
+        # add appropriate scripts, styles, etc. to the template vars
+        template_values.update(self.template_boilerplate)
         
         template = jinja_environment.get_template('index.html')
         self.response.out.write(template.render(template_values))
