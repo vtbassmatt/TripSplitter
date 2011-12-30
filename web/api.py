@@ -171,6 +171,41 @@ class TripHandler(webapp2.RequestHandler):
     #    TODO: allow updates
     #    pass
     
+    def delete(self, trip_key):
+        
+        errors = []
+        output = ""
+        user = users.get_current_user()
+        authz = Authz(user)
+        self.response.headers["Content-type"] = "application/json"
+
+        try:
+            # get the trip
+            trip = Trip.get(trip_key)
+            
+            # verify the user is authorized to delete the trip
+            authz.deleteTrip(trip)
+            
+            # delete the trip
+            trip.delete()
+            
+            # TODO: delete related expenses
+                
+        except db.BadKeyError:
+            errors.append({"message":"Invalid trip key"})
+        except PermissionError:
+            errors.append({"message":"You are not authorized to delete that trip"})
+        except db.NotSavedError:
+            errors.append({"message":"Unable to delete trip"})
+        except Exception as e:
+            logging.exception(e)
+            errors.append({"message":"Unexpected error deleting trip"})
+        
+        if len(errors) > 0:
+            output = json.dumps({"error":errors})
+            
+        self.response.out.write(output)
+    
 
 class ExpenseListHandler(webapp2.RequestHandler):
     def get(self, trip_key):

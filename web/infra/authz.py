@@ -67,6 +67,21 @@ class Authz():
         
         raise PermissionError('User not allowed to update this trip')
     
+    def deleteTrip(self, trip):
+        """Determines whether the user is allowed to delete a particular trip
+        
+        trip can be a trip key or a trip object"""
+        if isinstance(trip, Trip):
+            pass
+        else:
+            trip = Trip.get(trip)
+        
+        # logic determining whether the user can delete the trip
+        if self.user == trip.owner:
+            return
+        
+        raise PermissionError('User not allowed to delete this trip')
+    
     def createExpense(self, trip):
         """Determines whether the user is allowed to create expenses for a trip"""
         try:
