@@ -74,7 +74,7 @@ class TripListHandler(webapp2.RequestHandler):
         # user is allowed, so go ahead and try to create this thing
         logging.debug(self.request.body)
         
-        data = self._unpack_request()
+        data = self._unpack_post_request()
         logging.debug(data)
         
         if data['name'] == "" or data['password'] == "":
@@ -117,8 +117,13 @@ class TripListHandler(webapp2.RequestHandler):
         self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
     
-    def _unpack_request(self):
+    def _unpack_post_request(self):
         """Unpack the request body whether it's form-encoded or JSON"""
+        
+        # TODO: it makes me nervous that in my POST functions,
+        #       I use an empty string for data not sent by the app.  These
+        #       should probably be None instead
+        
         scalars = ('name', 'password', 'start_date', 'end_date')
         vectors = ('traveler', )
         if self.request.headers['Content-type'] == 'application/json':
@@ -167,9 +172,80 @@ class TripHandler(webapp2.RequestHandler):
             
         self.response.out.write(output)
 
-    #def put(self, trip_key):
-    #    TODO: allow updates
-    #    pass
+    def put(self, trip_key):
+
+        errors = []
+        output = ""
+        user = users.get_current_user()
+        authz = Authz(user)
+        self.response.headers["Content-type"] = "application/json"
+
+        try:
+            # get the trip
+            trip = Trip.get(trip_key)
+            
+            # verify the user is authorized to update the trip
+            authz.updateTrip(trip)
+            
+        except db.BadKeyError:
+            errors.append({"message":"Invalid trip key"})
+        except PermissionError:
+            errors.append({"message":"You are not authorized to view that trip"})            
+        except Exception as e:
+            logging.exception(e)
+            errors.append({"message":"Unexpected error loading trip"})
+        
+        # bail if we hit authz errors        
+        if len(errors) > 0:
+            self.response.set_status(400);
+            output = json.dumps({"error":errors})
+            self.response.out.write(output)
+            return
+        
+        # now that we know the user is authorized, perform the update
+        logging.info(self.request.body)
+        try:
+            data = self._unpack_put_request()
+            logging.debug(data)
+            
+            # TODO: accept these other properties
+            properties = ('name', 'password',) #'start_date', 'end_date', 'traveler')
+            for prop in properties:
+                if prop in data:
+                    # TODO: validate the data (for instance, dates will almost
+                    #       certainly fail without some scrubbing)
+                    setattr(trip, prop, data[prop])
+            
+            trip.put()
+            
+            # per the Backbone documentation, this method needs to:
+            #   "[w]hen returning a JSON response, send down the attributes of
+            #   the model that have been changed by the server, and need to be
+            #   updated on the client"
+            output = GqlEncoder().encode({'modify_date':trip.modify_date})
+                    
+        except NotImplementedError as e:
+            errors.append({"message":e.args})
+        except Exception as e:
+            logging.exception(e)
+            errors.append({"message":"Unexpected error updating trip"})
+        
+        if len(errors) > 0:
+            self.response.set_status(400);
+            output = json.dumps({"error":errors})
+            
+        self.response.out.write(output)
+        
+    def _unpack_put_request(self):
+        """Translate JSON into a Python object"""
+        scalars = ('name', 'password', 'start_date', 'end_date')
+        vectors = ('traveler', )
+        if self.request.headers['Content-type'] == 'application/json':
+            data = json.loads(self.request.body)
+        else:
+            raise NotImplementedError("PUT only accepts JSON-formatted data")
+        
+        return data
     
     def delete(self, trip_key):
         
@@ -202,6 +278,7 @@ class TripHandler(webapp2.RequestHandler):
             errors.append({"message":"Unexpected error deleting trip"})
         
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
             
         self.response.out.write(output)
@@ -234,6 +311,7 @@ class ExpenseListHandler(webapp2.RequestHandler):
             
         # if errors encountered so far, bail
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
             self.response.out.write(output)
             return
@@ -250,6 +328,7 @@ class ExpenseListHandler(webapp2.RequestHandler):
             errors.append({"message":"Unexpected error listing expenses"})
         
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"errors":errors})
         
         self.response.headers["Content-type"] = "application/json"

@@ -5,6 +5,8 @@ window.Trip = Backbone.Model.extend({
         "name": "",
         "password": ""
     }
+    // TODO: override toJSON so that only certain attributes will
+    //       be sent up
 });
 
 window.TripCollection = Backbone.Collection.extend({
