@@ -72,20 +72,21 @@ class TripListHandler(webapp2.RequestHandler):
             return
         
         # user is allowed, so go ahead and try to create this thing
-        logging.info(self.request.body)
-        name = self.request.get('name')
-        password = self.request.get('password')
+        logging.debug(self.request.body)
         
-        if name == "" or password == "":
+        data = self._unpack_request()
+        logging.debug(data)
+        
+        if data['name'] == "" or data['password'] == "":
             errors.append({"message":"Trip name and password are required."})
         else:
             try:
-                trip = Trip(name=name,
-                            password=password,
+                trip = Trip(name=data['name'],
+                            password=data['password'],
                             owner=user)
                 
                 # get traveler names
-                raw_travelers = self.request.get_all("traveler")
+                raw_travelers = data['traveler']
                 if len(raw_travelers) > Config.limits.travelers_per_trip:
                     logging.warning('Attempt to add too many travelers: %s', user.nickname)
                     raw_travelers = raw_travelers[:Config.limits.travelers_per_trip]
@@ -97,14 +98,14 @@ class TripListHandler(webapp2.RequestHandler):
                 
                 # get dates
                 # TODO: validation that these dates are sane and properly ordered
-                start_date = dateparse(self.request.get('startdate'))
-                end_date = dateparse(self.request.get('enddate'))
+                start_date = dateparse(data['start_date'])
+                end_date = dateparse(data['end_date'])
                 trip.start_date = start_date.date()
                 trip.end_date = end_date.date()
                 
                 trip.put()
                 
-                output = json.dumps({"key":"%s" % trip.key()})
+                output = json.dumps({"id":"%s" % trip.key()})
             except Exception as e:
                 logging.exception(e)
                 errors.append({"message":"Unexpected error creating trip"})
@@ -115,6 +116,24 @@ class TripListHandler(webapp2.RequestHandler):
 
         self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
+    
+    def _unpack_request(self):
+        """Unpack the request body whether it's form-encoded or JSON"""
+        scalars = ('name', 'password', 'start_date', 'end_date')
+        vectors = ('traveler', )
+        if self.request.headers['Content-type'] == 'application/json':
+            data = json.loads(self.request.body)
+            for key in scalars:
+                if not key in data:
+                    data[key] = ""
+            for key in vectors:
+                if not key in data:
+                    data[key] = []
+        else:
+            data = dict([(key,self.request.get(key)) for key in scalars])
+            data.update( dict([(key,self.request.get_all(key)) for key in vectors]) )
+        
+        return data
 
 class TripHandler(webapp2.RequestHandler):
     def get(self, trip_key):
@@ -265,7 +284,7 @@ class ExpenseListHandler(webapp2.RequestHandler):
                 
                 expense.put()
                 
-                output = json.dumps({"key":"%s" % expense.key()})
+                output = json.dumps({"id":"%s" % expense.key()})
             except Exception as e:
                 logging.exception(e)
                 errors.append({"message":"Unexpected error creating expense"})
