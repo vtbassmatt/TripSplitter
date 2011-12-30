@@ -10,8 +10,12 @@
 </head>
 <body>
 <div>{{ test }}</div>
+<ul id="trip-list"></ul>
+<button id="new-trip">New Trip</button>
 <script language="javascript">
-var tripApp = new TripApplication;
+$(function() {
+    window.tripApp = new TripApplication;
+});
 </script>
 </body>
 </html>
