@@ -40,6 +40,7 @@ class TripListHandler(webapp2.RequestHandler):
             errors.append({"message":"Unexpected error listing trips"})
         
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
         
         self.response.headers["Content-type"] = "application/json"
@@ -65,10 +66,13 @@ class TripListHandler(webapp2.RequestHandler):
         
         # bail if we hit authz errors        
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
             self.response.out.write(output)
+            return
         
         # user is allowed, so go ahead and try to create this thing
+        logging.info(self.request.body)
         name = self.request.get('name')
         password = self.request.get('password')
         
@@ -106,6 +110,7 @@ class TripListHandler(webapp2.RequestHandler):
                 errors.append({"message":"Unexpected error creating trip"})
 
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
 
         self.response.headers["Content-type"] = "application/json"
@@ -223,6 +228,7 @@ class ExpenseListHandler(webapp2.RequestHandler):
         
         # bail if we hit authz errors        
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
             self.response.out.write(output)
             return
@@ -265,6 +271,7 @@ class ExpenseListHandler(webapp2.RequestHandler):
                 errors.append({"message":"Unexpected error creating expense"})
         
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
 
         self.response.headers["Content-type"] = "application/json"
@@ -297,6 +304,7 @@ class ExpenseHandler(webapp2.RequestHandler):
             
         # if errors encountered so far, bail
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
             self.response.out.write(output)
             return
@@ -325,6 +333,7 @@ class ExpenseHandler(webapp2.RequestHandler):
             errors.append({"message":"Unexpected error loading expense"})
 
         if len(errors) > 0:
+            self.response.set_status(400);
             output = json.dumps({"error":errors})
             
         self.response.out.write(output)

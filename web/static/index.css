@@ -3,10 +3,14 @@
   font-size: 18px;
 }
 
+.header {
+	padding-top: 5px;
+}
+
 .leftArea {
 	position: absolute;
 	left: 10px;
-	top: 10px;
+	top: 70px;
 	bottom: 20px;
 	width: 260px;
 	border:solid 1px #CCCCCC;
@@ -15,7 +19,7 @@
 
 .form-left-col {
 	position: absolute;
-	top: 10px;
+	top: 70px;
 	bottom: 20px;
 	left:300px;
 	overflow-y: scroll;
@@ -24,7 +28,7 @@
 
 .form-right-col {
 	position: absolute;
-	top: 10px;
+	top: 70px;
 	bottom: 20px;
 	left:650px;
 	overflow-y: scroll;

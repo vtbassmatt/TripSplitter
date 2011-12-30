@@ -9,11 +9,18 @@
     <link rel="stylesheet" href="{{ index_css }}"></script>
 </head>
 <body>
+    <div class="header">
+    </div>
+    
     <div class="leftArea">
         <ul id="tripList"></ul>
     </div>
     
     <div id="mainArea"></div>
+    
+    <script type="text/template" id="header">
+        <button class="new">New Trip</button>
+    </script>
     
     <script type="text/template" id="trip-list-item">
         <li><a href='#trips/<%= id %>'><%= name %></a></li>
@@ -29,6 +36,9 @@
             
             <label>Password:</label>
             <input type="text" id="password" value="<%= password %>" required/>
+            
+            <button class="save">Save</button>
+            <button class="delete">Delete</button>
         </div>
         
         <div class="form-right-col">
