@@ -127,6 +127,7 @@ class TripListHandler(webapp2.RequestHandler):
         scalars = ('name', 'password', 'start_date', 'end_date')
         vectors = ('traveler', )
         if self.request.headers['Content-type'].startswith('application/json'):
+            logging.debug("Unpacking POST as JSON")
             data = json.loads(self.request.body)
             for key in scalars:
                 if not key in data:
@@ -135,6 +136,7 @@ class TripListHandler(webapp2.RequestHandler):
                 if not key in data:
                     data[key] = []
         else:
+            logging.debug("Unpacking POST as form-encoded")
             data = dict([(key,self.request.get(key)) for key in scalars])
             data.update( dict([(key,self.request.get_all(key)) for key in vectors]) )
         
