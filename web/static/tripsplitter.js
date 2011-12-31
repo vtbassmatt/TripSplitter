@@ -155,22 +155,36 @@ window.HeaderView = Backbone.View.extend({
 var AppRouter = Backbone.Router.extend({
     routes: {
         ""              : "list",
-        "trips/:id"      : "tripDetails"
+        "trips/:id"     : "tripDetails"
     },
     
     list: function() {
         console.log('list');
         this.tripList = new TripCollection();
-        this.tripListView = new TripListView({model: this.tripList});
-        this.tripList.fetch();
+        var self = this;
+        this.tripList.fetch({
+            success: function() {
+                console.log('list$success');
+                self.tripListView = new TripListView({model: self.tripList});
+                self.tripListView.render();
+                if(self.requestedId) self.tripDetails(self.requestedId);
+            }
+        });
     },
     
     tripDetails: function(id) {
         console.log('tripDetails(' + id + ')');
-        this.trip = this.tripList.get(id);
-        if(app.tripView) app.tripView.close();
-        this.tripView = new TripView({model: this.trip});
-        this.tripView.render();
+        if(this.tripList) {
+            console.log('found tripList');
+            this.trip = this.tripList.get(id);
+            if(app.tripView) app.tripView.close();
+            this.tripView = new TripView({model: this.trip});
+            this.tripView.render();
+        } else {
+            console.log('did not find tripList');
+            this.requestedId = id;
+            this.list();
+        }
     }
 });
 
