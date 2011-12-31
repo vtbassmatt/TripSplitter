@@ -18,6 +18,7 @@ window.TripListView = Backbone.View.extend({
     el: $('#tripList'),
     initialize: function() {
         console.log('TripListView::initialize');
+        $(this.el).empty();
         this.model.bind('reset', this.render, this);
         this.model.bind('add', function(trip) {
             $('#tripList').append(
@@ -119,8 +120,10 @@ window.TripView = Backbone.View.extend({
     
     deleteTrip: function() {
         console.log('TripView::deleteTrip');
+        var self = this;
         this.model.destroy({
             success: function() {
+                self.close();
                 alert('Trip deleted');
                 window.history.back();
             }
@@ -152,9 +155,7 @@ window.HeaderView = Backbone.View.extend({
     
     newTrip: function(event) {
         console.log('HeaderView::newTrip');
-        if(app.tripView) app.tripView.close();
-        app.tripView = new TripView({model: new Trip()});
-        app.tripView.render();
+        app.navigate("trips/new", true);
         return false;
     }
 });
@@ -162,6 +163,7 @@ window.HeaderView = Backbone.View.extend({
 var AppRouter = Backbone.Router.extend({
     routes: {
         ""              : "list",
+        "trips/new"     : "newTrip",
         "trips/:id"     : "tripDetails"
     },
     
@@ -177,6 +179,13 @@ var AppRouter = Backbone.Router.extend({
                 if(self.requestedId) self.tripDetails(self.requestedId);
             }
         });
+    },
+    
+    newTrip: function() {
+        console.log('newTrip');
+        if(app.tripView) app.tripView.close();
+        app.tripView = new TripView({model: new Trip()});
+        app.tripView.render();
     },
     
     tripDetails: function(id) {
