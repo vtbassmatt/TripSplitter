@@ -1,3 +1,10 @@
+window.debug = {}
+window.debug.log = function(param) {
+    if(console && console.log) {
+        console.log(param);
+    }
+}
+
 window.Trip = Backbone.Model.extend({
     urlRoot: "/api/trip",
     defaults: {
@@ -17,7 +24,7 @@ window.TripCollection = Backbone.Collection.extend({
 window.TripListView = Backbone.View.extend({
     el: $('#tripList'),
     initialize: function() {
-        console.log('TripListView::initialize');
+        debug.log('TripListView::initialize');
         $(this.el).empty();
         this.model.bind('reset', this.render, this);
         this.model.bind('add', function(trip) {
@@ -26,7 +33,7 @@ window.TripListView = Backbone.View.extend({
         });
     },
     render: function(eventName) {
-        console.log('TripListView::render');
+        debug.log('TripListView::render');
         _.each(this.model.models, function(trip) {
             $(this.el).append(new TripListItemView({model: trip}).render().el);
         }, this);
@@ -40,19 +47,19 @@ window.TripListItemView = Backbone.View.extend({
     template: _.template($('#trip-list-item').html()),
     
     initialize: function() {
-        console.log('TripListItemView::initialize');
+        debug.log('TripListItemView::initialize');
         this.model.bind("change", this.render, this);
         this.model.bind("destroy", this.close, this);
     },
     
     render: function(eventName) {
-        console.log('TripListItemView::render');
+        debug.log('TripListItemView::render');
         $(this.el).html(this.template(this.model.toJSON()));
         return this;
     },
     
     close: function() {
-        console.log('TripListItemView::close');
+        debug.log('TripListItemView::close');
         $(this.el).unbind();
         $(this.el).remove();
     }
@@ -64,12 +71,12 @@ window.TripView = Backbone.View.extend({
     template: _.template($('#trip-details').html()),
     
     initialize: function() {
-        console.log('TripView::initialize');
+        debug.log('TripView::initialize');
         this.model.bind("change", this.render, this);
     },
     
     render: function(eventName) {
-        console.log('TripView::render');
+        debug.log('TripView::render');
         $(this.el).html(this.template(this.model.toJSON()));
         return this;
     },
@@ -81,9 +88,9 @@ window.TripView = Backbone.View.extend({
     },
     
     change: function(event) {
-        console.log('TripView::change');
+        debug.log('TripView::change');
         var target = event.target;
-        console.log('changing ' + target.id + ' from "'
+        debug.log('changing ' + target.id + ' from "'
             + target.defaultValue + '" to "' + target.value + '"');
         // could change model on the spot here
         // var change = {};
@@ -92,13 +99,13 @@ window.TripView = Backbone.View.extend({
     },
     
     saveTrip: function() {
-        console.log('TripView::saveTrip');
+        debug.log('TripView::saveTrip');
         this.model.set({
             name: $('#name').val(),
             password: $('#password').val()
         });
         if (this.model.isNew()) {
-            console.log("the model is new");
+            debug.log("the model is new");
             var self = this;
             app.tripList.create(this.model, {
                 'success' : function() {
@@ -112,14 +119,14 @@ window.TripView = Backbone.View.extend({
                 }
             });
         } else {
-            console.log("the model is not new");
+            debug.log("the model is not new");
             this.model.save();
         }
         return false;
     },
     
     deleteTrip: function() {
-        console.log('TripView::deleteTrip');
+        debug.log('TripView::deleteTrip');
         var self = this;
         this.model.destroy({
             success: function() {
@@ -132,7 +139,7 @@ window.TripView = Backbone.View.extend({
     },
     
     close: function() {
-        console.log('TripView::close');
+        debug.log('TripView::close');
         $(this.el).unbind();
         $(this.el).empty();
     }
@@ -144,7 +151,7 @@ window.HeaderView = Backbone.View.extend({
     template: _.template($('#header').html()),
     
     initialize: function() {
-        console.log('HeaderView::initialize');
+        debug.log('HeaderView::initialize');
         $(this.el).html(this.template());
         return this;
     },
@@ -154,7 +161,7 @@ window.HeaderView = Backbone.View.extend({
     },
     
     newTrip: function(event) {
-        console.log('HeaderView::newTrip');
+        debug.log('HeaderView::newTrip');
         app.navigate("trips/new", true);
         return false;
     }
@@ -168,12 +175,12 @@ var AppRouter = Backbone.Router.extend({
     },
     
     list: function() {
-        console.log('list');
+        debug.log('list');
         this.tripList = new TripCollection();
         var self = this;
         this.tripList.fetch({
             success: function() {
-                console.log('list$success');
+                debug.log('list$success');
                 self.tripListView = new TripListView({model: self.tripList});
                 self.tripListView.render();
                 if(self.requestedId) self.tripDetails(self.requestedId);
@@ -182,22 +189,22 @@ var AppRouter = Backbone.Router.extend({
     },
     
     newTrip: function() {
-        console.log('newTrip');
+        debug.log('newTrip');
         if(app.tripView) app.tripView.close();
         app.tripView = new TripView({model: new Trip()});
         app.tripView.render();
     },
     
     tripDetails: function(id) {
-        console.log('tripDetails(' + id + ')');
+        debug.log('tripDetails(' + id + ')');
         if(this.tripList) {
-            console.log('found tripList');
+            debug.log('found tripList');
             this.trip = this.tripList.get(id);
             if(app.tripView) app.tripView.close();
             this.tripView = new TripView({model: this.trip});
             this.tripView.render();
         } else {
-            console.log('did not find tripList');
+            debug.log('did not find tripList');
             this.requestedId = id;
             this.list();
         }
