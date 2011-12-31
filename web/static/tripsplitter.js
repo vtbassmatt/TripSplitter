@@ -98,11 +98,18 @@ window.TripView = Backbone.View.extend({
         });
         if (this.model.isNew()) {
             console.log("the model is new");
-            app.tripList.create(this.model, {'error':function(model, response){
-                errStr = "Error " +response.status +
-                ": " + response.responseText;
-                alert(errStr);
-            }});
+            var self = this;
+            app.tripList.create(this.model, {
+                'success' : function() {
+                    // update the URL without actually navigating
+                    app.navigate('trips/'+self.model.id, false);
+                },
+                'error'   : function(model, response){
+                    errStr = "Error " +response.status +
+                    ": " + response.responseText;
+                    alert(errStr);
+                }
+            });
         } else {
             console.log("the model is not new");
             this.model.save();
