@@ -126,7 +126,7 @@ class TripListHandler(webapp2.RequestHandler):
         
         scalars = ('name', 'password', 'start_date', 'end_date')
         vectors = ('traveler', )
-        if self.request.headers['Content-type'] == 'application/json':
+        if self.request.headers['Content-type'].startswith('application/json'):
             data = json.loads(self.request.body)
             for key in scalars:
                 if not key in data:
