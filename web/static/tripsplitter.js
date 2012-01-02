@@ -8,12 +8,41 @@ window.log = function(){
   }
 };
 
+// extend date to handle the dates which come down from the server
+Date.prototype.fromJSON = function(json_obj) {
+    if(json_obj.year)  this.setYear(json_obj.year);
+    // fun fact: JS months count from 0
+    if(json_obj.month) this.setMonth(json_obj.month - 1);
+    if(json_obj.day)   this.setDate(json_obj.day);
+};
+
+// and a "class" method for building dates from JSON directly
+Date.fromJSON = function(json_obj) {
+    d = new Date();
+    d.fromJSON(json_obj);
+    return d;
+};
+
 window.Trip = Backbone.Model.extend({
     urlRoot: "/api/trip",
     defaults: {
         "id": null,
         "name": "",
-        "password": ""
+        "password": "",
+        "start_date": (new Date()).toDateString()
+    },
+    parse: function(response) {
+        log('Trip::parse');
+        dates = ["create_date", "end_date", "modify_date", "start_date"];
+        for(i in response) {
+            if($.inArray(i, dates) > -1) {
+                response[i] = (Date.fromJSON(response[i])).toDateString();
+            //} else {
+            //    response[i] = response[i];
+            }
+        }
+        log(response);
+        return response;
     }
     // TODO: override toJSON so that only certain attributes will
     //       be sent up
@@ -21,7 +50,14 @@ window.Trip = Backbone.Model.extend({
 
 window.TripCollection = Backbone.Collection.extend({
     model: Trip,
-    url: '/api/trip'
+    url: '/api/trip',
+    parse: function(response) {
+        log('TripCollection::parse');
+        for(i in response) {
+            Trip.prototype.parse(response[i]);
+        }
+        return response;
+    }
 });
 
 window.TripListView = Backbone.View.extend({
@@ -105,7 +141,8 @@ window.TripView = Backbone.View.extend({
         log('TripView::saveTrip');
         this.model.set({
             name: $('#name').val(),
-            password: $('#password').val()
+            password: $('#password').val(),
+            start_date: $('#start_date').val()
         });
         if (this.model.isNew()) {
             log("the model is new");
@@ -178,12 +215,12 @@ var AppRouter = Backbone.Router.extend({
     },
     
     list: function() {
-        log('list');
+        log('AppRouter::list');
         this.tripList = new TripCollection();
         var self = this;
         this.tripList.fetch({
             success: function() {
-                log('list$success');
+                log('AppRouter::list$success');
                 self.tripListView = new TripListView({model: self.tripList});
                 self.tripListView.render();
                 if(self.requestedId) self.tripDetails(self.requestedId);
@@ -192,14 +229,17 @@ var AppRouter = Backbone.Router.extend({
     },
     
     newTrip: function() {
-        log('newTrip');
+        log('AppRouter::newTrip');
+        if(!this.tripList) {
+            this.list();
+        }
         if(app.tripView) app.tripView.close();
         app.tripView = new TripView({model: new Trip()});
         app.tripView.render();
     },
     
     tripDetails: function(id) {
-        log('tripDetails(' + id + ')');
+        log('AppRouter::tripDetails(' + id + ')');
         if(this.tripList) {
             log('found tripList');
             this.trip = this.tripList.get(id);

@@ -101,11 +101,15 @@ class TripListHandler(webapp2.RequestHandler):
                 start_date = dateparse(data['start_date'])
                 end_date = dateparse(data['end_date'])
                 trip.start_date = start_date.date()
+                logging.debug("date = " + str(start_date.date()))
                 trip.end_date = end_date.date()
                 
                 trip.put()
                 
-                output = json.dumps({"id":"%s" % trip.key()})
+                output = json.dumps({
+                    "id":"%s" % trip.key(),
+                    "start_date":"%s" % GqlEncoder().encode(trip.start_date),
+                })
             except Exception as e:
                 logging.exception(e)
                 errors.append({"message":"Unexpected error creating trip"})
