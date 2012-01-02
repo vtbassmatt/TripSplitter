@@ -34,14 +34,12 @@ window.Trip = Backbone.Model.extend({
     parse: function(response) {
         log('Trip::parse');
         dates = ["create_date", "end_date", "modify_date", "start_date"];
-        for(i in response) {
-            if($.inArray(i, dates) > -1) {
-                response[i] = (Date.fromJSON(response[i])).toDateString();
-            //} else {
-            //    response[i] = response[i];
+        for(i in dates) {
+            date = dates[i];
+            if(response[date]) { 
+                response[date] = (Date.fromJSON(response[date])).toDateString();
             }
         }
-        log(response);
         return response;
     }
     // TODO: override toJSON so that only certain attributes will
