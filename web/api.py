@@ -215,12 +215,13 @@ class TripHandler(webapp2.RequestHandler):
             logging.debug(data)
             
             # TODO: accept these other properties
-            properties = ('name', 'password',) #'start_date', 'end_date', 'traveler')
+            properties = ('name', 'password', 'start_date',) #'end_date', 'traveler')
             for prop in properties:
                 if prop in data:
                     # TODO: validate the data (for instance, dates will almost
                     #       certainly fail without some scrubbing)
-                    setattr(trip, prop, data[prop])
+                    scrubbed = self._scrub(prop, data[prop])
+                    setattr(trip, prop, scrubbed)
             
             trip.put()
             
@@ -231,6 +232,8 @@ class TripHandler(webapp2.RequestHandler):
             output = GqlEncoder().encode({'modify_date':trip.modify_date})
                     
         except NotImplementedError as e:
+            errors.append({"message":e.args})
+        except BadValueError as e:
             errors.append({"message":e.args})
         except Exception as e:
             logging.exception(e)
@@ -252,6 +255,12 @@ class TripHandler(webapp2.RequestHandler):
             raise NotImplementedError("PUT only accepts JSON-formatted data")
         
         return data
+    
+    def _scrub(self, property, val):
+        # TODO: scrub data according to the property name
+        if property == "start_date":
+            return dateparse(val).date()
+        return val
     
     def delete(self, trip_key):
         
