@@ -106,6 +106,7 @@ class TripListHandler(webapp2.RequestHandler):
                 
                 trip.put()
                 
+                # TODO: see TripHandler::put for better-looking code
                 output = json.dumps({
                     "id":"%s" % trip.key(),
                     "start_date":"%s" % GqlEncoder().encode(trip.start_date),
@@ -229,7 +230,11 @@ class TripHandler(webapp2.RequestHandler):
             #   "[w]hen returning a JSON response, send down the attributes of
             #   the model that have been changed by the server, and need to be
             #   updated on the client"
-            output = GqlEncoder().encode({'modify_date':trip.modify_date})
+            # Dates need to be shown because their formatting can change
+            output = GqlEncoder().encode({
+                'modify_date':trip.modify_date,
+                'start_date':trip.start_date,
+            })
                     
         except NotImplementedError as e:
             errors.append({"message":e.args})
