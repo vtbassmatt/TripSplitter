@@ -29,14 +29,15 @@ window.Trip = Backbone.Model.extend({
         "id": null,
         "name": "",
         "password": "",
-        "start_date": (new Date()).toDateString()
+        "start_date": (new Date()).toDateString(),
+        "end_date": (new Date()).toDateString()
     },
     parse: function(response) {
         log('Trip::parse');
         dates = ["create_date", "end_date", "modify_date", "start_date"];
         for(i in dates) {
-            date = dates[i];
-            if(response[date]) { 
+            var date = dates[i];
+            if(response[date]) {
                 response[date] = (Date.fromJSON(response[date])).toDateString();
             }
         }
@@ -140,7 +141,8 @@ window.TripView = Backbone.View.extend({
         this.model.set({
             name: $('#name').val(),
             password: $('#password').val(),
-            start_date: $('#start_date').val()
+            start_date: $('#start_date').val(),
+            end_date: $('#end_date').val()
         });
         if (this.model.isNew()) {
             log("the model is new");

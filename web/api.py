@@ -101,15 +101,17 @@ class TripListHandler(webapp2.RequestHandler):
                 start_date = dateparse(data['start_date'])
                 end_date = dateparse(data['end_date'])
                 trip.start_date = start_date.date()
-                logging.debug("date = " + str(start_date.date()))
+                #logging.debug("start date = " + str(start_date.date()))
                 trip.end_date = end_date.date()
+                #logging.debug("end date = " + str(end_date.date()))
                 
                 trip.put()
                 
-                # TODO: see TripHandler::put for better-looking code
-                output = json.dumps({
+                output = GqlEncoder().encode({
                     "id":"%s" % trip.key(),
-                    "start_date":"%s" % GqlEncoder().encode(trip.start_date),
+                    'modify_date':trip.modify_date,
+                    'start_date':trip.start_date,
+                    'end_date':trip.end_date,
                 })
             except Exception as e:
                 logging.exception(e)
@@ -216,7 +218,7 @@ class TripHandler(webapp2.RequestHandler):
             logging.debug(data)
             
             # TODO: accept these other properties
-            properties = ('name', 'password', 'start_date',) #'end_date', 'traveler')
+            properties = ('name', 'password', 'start_date', 'end_date',) #'traveler')
             for prop in properties:
                 if prop in data:
                     # TODO: validate the data (for instance, dates will almost
@@ -234,6 +236,7 @@ class TripHandler(webapp2.RequestHandler):
             output = GqlEncoder().encode({
                 'modify_date':trip.modify_date,
                 'start_date':trip.start_date,
+                'end_date':trip.end_date,
             })
                     
         except NotImplementedError as e:
@@ -263,7 +266,7 @@ class TripHandler(webapp2.RequestHandler):
     
     def _scrub(self, property, val):
         # TODO: scrub data according to the property name
-        if property == "start_date":
+        if property in ["start_date", "end_date"]:
             return dateparse(val).date()
         return val
     
