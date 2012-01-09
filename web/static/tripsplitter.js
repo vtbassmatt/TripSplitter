@@ -199,12 +199,19 @@ window.HeaderView = Backbone.View.extend({
     },
     
     events: {
-        "click .new": "newTrip"
+        "click .new": "newTrip",
+        "click .home": "home"
     },
     
     newTrip: function(event) {
         log('HeaderView::newTrip');
         app.navigate("trips/new", true);
+        return false;
+    },
+    
+    home: function(event) {
+        log('HeaderView::home');
+        app.navigate("", true);
         return false;
     }
 });
@@ -218,6 +225,7 @@ var AppRouter = Backbone.Router.extend({
     
     list: function() {
         log('AppRouter::list');
+        if(app.tripView) app.tripView.close();
         this.tripList = new TripCollection();
         var self = this;
         this.tripList.fetch({
