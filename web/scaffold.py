@@ -32,16 +32,16 @@ class ScaffoldHandler(webapp2.RequestHandler):
         <div>Start Date: <input type="text" name="start_date"/></div>
         <div>End Date: <input type="text" name="end_date"/></div>
         <ul>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
-        <li>Traveler: <input type="text" name="traveler"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
+        <li>Traveler: <input type="text" name="travelers"/></li>
         </ul>
         <div><input type="submit" value="Create Trip"/></div>
     </form>

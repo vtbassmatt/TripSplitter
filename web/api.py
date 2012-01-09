@@ -72,10 +72,10 @@ class TripListHandler(webapp2.RequestHandler):
             return
         
         # user is allowed, so go ahead and try to create this thing
-        logging.debug(self.request.body)
+        #logging.debug(self.request.body)
         
         data = self._unpack_post_request()
-        logging.debug(data)
+        #logging.debug(data)
         
         if data['name'] == "" or data['password'] == "":
             errors.append({"message":"Trip name and password are required."})
@@ -86,7 +86,7 @@ class TripListHandler(webapp2.RequestHandler):
                             owner=user)
                 
                 # get traveler names
-                raw_travelers = data['traveler']
+                raw_travelers = data['travelers']
                 if len(raw_travelers) > Config.limits.travelers_per_trip:
                     logging.warning('Attempt to add too many travelers: %s', user.nickname)
                     raw_travelers = raw_travelers[:Config.limits.travelers_per_trip]
@@ -132,7 +132,7 @@ class TripListHandler(webapp2.RequestHandler):
         #       should probably be None instead
         
         scalars = ('name', 'password', 'start_date', 'end_date')
-        vectors = ('traveler', )
+        vectors = ('travelers', )
         if self.request.headers['Content-type'].startswith('application/json'):
             logging.debug("Unpacking POST as JSON")
             data = json.loads(self.request.body)
@@ -218,7 +218,7 @@ class TripHandler(webapp2.RequestHandler):
             logging.debug(data)
             
             # TODO: accept these other properties
-            properties = ('name', 'password', 'start_date', 'end_date',) #'traveler')
+            properties = ('name', 'password', 'start_date', 'end_date', 'travelers')
             for prop in properties:
                 if prop in data:
                     # TODO: validate the data (for instance, dates will almost
