@@ -468,6 +468,8 @@ class Unpacker:
         self.vectors = vectors
         
     def unpack_put(self, request):
+        """Unpack the request body for a PUT request"""
+        
         # TODO: verify that appropriate scalars and vectors are found
         if request.headers['Content-type'] == 'application/json':
             data = json.loads(request.body)
@@ -477,7 +479,7 @@ class Unpacker:
         return data
 
     def unpack_post(self, request):
-        """Unpack the request body whether it's form-encoded or JSON"""
+        """Unpack the POST request body whether it's form-encoded or JSON"""
         
         # TODO: it makes me nervous that in my POST functions,
         #       I use an empty string for data not sent by the app.  These
@@ -505,6 +507,15 @@ class TripUnpacker(Unpacker):
         Unpacker.__init__(
             self,
             scalars=('name', 'password', 'start_date', 'end_date'),
+            vectors=('travelers', )
+        )
+
+class ExpenseUnpacker(Unpacker):
+    """Specialized unpacker for Expense data"""
+    def __init__(self):
+        Unpacker.__init__(
+            self,
+            scalars=('currency', 'description', 'expense_date', 'payer', 'value'),
             vectors=('travelers', )
         )
 
