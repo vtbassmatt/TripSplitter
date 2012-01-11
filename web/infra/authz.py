@@ -8,7 +8,7 @@ import logging
 from google.appengine.api import users
 from google.appengine.ext import db
 
-from models import Trip
+from models import Trip, Expense
 
 class Authz():
     """Authorization manager.  Member methods allow other aspects of the
@@ -88,6 +88,24 @@ class Authz():
             self.updateTrip(trip)
         except PermissionError:
             raise PermissionError('User cannot create expenses for this trip')
+    
+    def deleteExpense(self, expense):
+        """Determines whether the user is allowed to delete an expense"""
+        if isinstance(expense, Expense):
+            pass
+        else:
+            expense = Expense.get(expense)
+        
+        # determine if the user owns the related trip
+        try:
+            trip = Trip.get(expense.parent_key())
+        except db.BadKeyError:
+            raise PermissionError('User cannot delete this expense because the trip could not be loaded')
+            
+        if self.user == trip.owner:
+            return
+
+        raise PermissionError('User cannot delete this expense')
     
 
 

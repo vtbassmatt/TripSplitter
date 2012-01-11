@@ -463,8 +463,37 @@ class ExpenseHandler(webapp2.RequestHandler):
         pass
 
     def delete(self, trip_key, expense_key):
-        #TODO: allow deletes
-        pass
+        errors = []
+        output = ""
+        user = users.get_current_user()
+        authz = Authz(user)
+        self.response.headers["Content-type"] = "application/json"
+
+        try:
+            # get the expense
+            expense = Expense.get(expense_key)
+            
+            # verify the user is authorized to delete the expense
+            authz.deleteExpense(expense)
+            
+            # delete the expense
+            expense.delete()
+                
+        except db.BadKeyError:
+            errors.append({"message":"Invalid expense key"})
+        except PermissionError:
+            errors.append({"message":"You are not authorized to delete that expense"})
+        except db.NotSavedError:
+            errors.append({"message":"Unable to delete expense"})
+        except Exception as e:
+            logging.exception(e)
+            errors.append({"message":"Unexpected error deleting expense"})
+        
+        if len(errors) > 0:
+            self.response.set_status(400);
+            output = json.dumps({"error":errors})
+            
+        self.response.out.write(output)
 
 class Unpacker:
     """Handles unpacking of POST and PUT request data into a Python object"""
