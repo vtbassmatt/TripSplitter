@@ -468,6 +468,7 @@ class Unpacker:
         self.vectors = vectors
         
     def unpack_put(self, request):
+        # TODO: verify that appropriate scalars and vectors are found
         if request.headers['Content-type'] == 'application/json':
             data = json.loads(request.body)
         else:
@@ -504,7 +505,7 @@ class TripUnpacker(Unpacker):
         Unpacker.__init__(
             self,
             scalars=('name', 'password', 'start_date', 'end_date'),
-            vectors=('traveler', )
+            vectors=('travelers', )
         )
 
 app = webapp2.WSGIApplication([
