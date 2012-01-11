@@ -354,38 +354,40 @@ class ExpenseListHandler(webapp2.RequestHandler):
             return
 
         # having passed authz, let's try creating the expense
-        desc = self.request.get('desc')
-        value = self.request.get('value')
-        payer = self.request.get('payer')
-        travelers = self.request.get_all('traveler')
+        data = ExpenseUnpacker().unpack_post(self.request)
 
-        if desc == "" or value == "" or payer == "":
+        if data['description'] == "" or data['value'] == "" or data['payer'] == "":
             errors.append({"message":"Description name, value, and payer are required."})
-        elif len(travelers) == 0:
+        elif len(data['travelers']) == 0:
             errors.append({"message":"At least one person must be specified as a traveler."})
         else:            
             try:
                 expense = Expense(
                     parent=trip.key(),
                     creator=user,
-                    description=desc,
-                    value=int(value),
+                    description=data['description'],
+                    value=int(data['value']),
                     currency="USD",
                 )
                 
                 # get the expense date
-                expense_date = dateparse(self.request.get('expensedate'))
+                expense_date = dateparse(data['expense_date'])
                 expense.expense_date = expense_date.date()
                 
                 # TODO: make sure these travelers are actually on the trip
-                expense.travelers = travelers
+                expense.travelers = data['travelers']
                 
                 # TODO: ensure the payer is actually a traveler
-                expense.payer = payer
+                expense.payer = data['payer']
                 
                 expense.put()
                 
-                output = json.dumps({"id":"%s" % expense.key()})
+                output = GqlEncoder().encode({
+                    "id":"%s" % expense.key(),
+                    'modify_date':expense.modify_date,
+                    'expense_date':expense.expense_date,
+                    'value':expense.value,
+                })
             except Exception as e:
                 logging.exception(e)
                 errors.append({"message":"Unexpected error creating expense"})

@@ -65,7 +65,7 @@ class ScaffoldHandler(webapp2.RequestHandler):
             [traveler_dropdown_src % (str,str) for str in trip.travelers])
         
         traveler_checkboxes_src = """        <div>
-            <input type="checkbox" name="traveler" value="%s" checked>
+            <input type="checkbox" name="travelers" value="%s" checked>
             <label for="traveler">%s</label>
         </div>"""
         traveler_checkboxes = "".join(
@@ -74,9 +74,9 @@ class ScaffoldHandler(webapp2.RequestHandler):
         return """<html><body>
     <h1>New Expense for '%s'</h1>
     <form action="%s" method="post">
-        <div>Expense: <input type="text" name="desc"/>*</div>
+        <div>Expense: <input type="text" name="description"/>*</div>
         <div>Cost: $<input type="text" name="value"/>*</div>
-        <div>Date: <input type="text" name="expensedate"/></div>
+        <div>Date: <input type="text" name="expense_date"/></div>
         <div>Payer: <select name="payer">%s</select>*</div>
         <div>Consumers:
         %s
