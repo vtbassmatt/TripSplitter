@@ -23,6 +23,7 @@ from config import Config
 
 class TripListHandler(webapp2.RequestHandler):
     def get(self):
+        # TODO: bring this in line with the other handler methods
         errors = []
         output = ""
         
