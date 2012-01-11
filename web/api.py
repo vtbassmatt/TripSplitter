@@ -74,7 +74,7 @@ class TripListHandler(webapp2.RequestHandler):
         # user is allowed, so go ahead and try to create this thing
         #logging.debug(self.request.body)
         
-        data = self._unpack_post_request()
+        data = TripUnpacker().unpack_post(self.request)
         #logging.debug(data)
         
         if data['name'] == "" or data['password'] == "":
@@ -124,31 +124,6 @@ class TripListHandler(webapp2.RequestHandler):
         self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
     
-    def _unpack_post_request(self):
-        """Unpack the request body whether it's form-encoded or JSON"""
-        
-        # TODO: it makes me nervous that in my POST functions,
-        #       I use an empty string for data not sent by the app.  These
-        #       should probably be None instead
-        
-        scalars = ('name', 'password', 'start_date', 'end_date')
-        vectors = ('travelers', )
-        if self.request.headers['Content-type'].startswith('application/json'):
-            logging.debug("Unpacking POST as JSON")
-            data = json.loads(self.request.body)
-            for key in scalars:
-                if not key in data:
-                    data[key] = ""
-            for key in vectors:
-                if not key in data:
-                    data[key] = []
-        else:
-            logging.debug("Unpacking POST as form-encoded")
-            data = dict([(key,self.request.get(key)) for key in scalars])
-            data.update( dict([(key,self.request.get_all(key)) for key in vectors]) )
-        
-        return data
-
 class TripHandler(webapp2.RequestHandler):
     def get(self, trip_key):
         
@@ -212,12 +187,11 @@ class TripHandler(webapp2.RequestHandler):
             return
         
         # now that we know the user is authorized, perform the update
-        logging.info(self.request.body)
+        logging.debug(self.request.body)
         try:
-            data = self._unpack_put_request()
+            data = TripUnpacker().unpack_put(self.request)
             logging.debug(data)
             
-            # TODO: accept these other properties
             properties = ('name', 'password', 'start_date', 'end_date', 'travelers')
             for prop in properties:
                 if prop in data:
@@ -241,7 +215,7 @@ class TripHandler(webapp2.RequestHandler):
                     
         except NotImplementedError as e:
             errors.append({"message":e.args})
-        except BadValueError as e:
+        except db.BadValueError as e:
             errors.append({"message":e.args})
         except Exception as e:
             logging.exception(e)
@@ -252,18 +226,7 @@ class TripHandler(webapp2.RequestHandler):
             output = json.dumps({"error":errors})
             
         self.response.out.write(output)
-        
-    def _unpack_put_request(self):
-        """Translate JSON into a Python object"""
-        scalars = ('name', 'password', 'start_date', 'end_date')
-        vectors = ('traveler', )
-        if self.request.headers['Content-type'] == 'application/json':
-            data = json.loads(self.request.body)
-        else:
-            raise NotImplementedError("PUT only accepts JSON-formatted data")
-        
-        return data
-    
+            
     def _scrub(self, property, val):
         # TODO: scrub data according to the property name
         if property in ["start_date", "end_date"]:
@@ -498,6 +461,51 @@ class ExpenseHandler(webapp2.RequestHandler):
     #    TODO: allow updates
     #    pass
 
+class Unpacker:
+    """Handles unpacking of POST and PUT request data into a Python object"""
+    def __init__(self, scalars=None, vectors=None):
+        self.scalars = scalars
+        self.vectors = vectors
+        
+    def unpack_put(self, request):
+        if request.headers['Content-type'] == 'application/json':
+            data = json.loads(request.body)
+        else:
+            raise NotImplementedError("PUT only accepts JSON-formatted data")
+        
+        return data
+
+    def unpack_post(self, request):
+        """Unpack the request body whether it's form-encoded or JSON"""
+        
+        # TODO: it makes me nervous that in my POST functions,
+        #       I use an empty string for data not sent by the app.  These
+        #       should probably be None instead
+        
+        if request.headers['Content-type'].startswith('application/json'):
+            logging.debug("Unpacking POST as JSON")
+            data = json.loads(request.body)
+            for key in self.scalars:
+                if not key in data:
+                    data[key] = ""
+            for key in self.vectors:
+                if not key in data:
+                    data[key] = []
+        else:
+            logging.debug("Unpacking POST as form-encoded")
+            data = dict([(key,request.get(key)) for key in self.scalars])
+            data.update( dict([(key,request.get_all(key)) for key in self.vectors]) )
+        
+        return data
+
+class TripUnpacker(Unpacker):
+    """Specialized unpacker for Trip data"""
+    def __init__(self):
+        Unpacker.__init__(
+            self,
+            scalars=('name', 'password', 'start_date', 'end_date'),
+            vectors=('traveler', )
+        )
 
 app = webapp2.WSGIApplication([
     webapp2.Route(r'/api/trip',
