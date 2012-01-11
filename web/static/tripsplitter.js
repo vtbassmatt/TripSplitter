@@ -43,9 +43,41 @@ window.Trip = Backbone.Model.extend({
             }
         }
         return response;
+    },
+    initialize: function() {
+        log('Trip::initialize');
+        this.expenses = new ExpenseCollection();
+        var self = this;
+        this.expenses.url = function() { 
+            if(self.id) return '/api/trip/' + self.id + '/expenses';
+            throw "Trip must be fetched or saved before expenses URL is valid";
+        }
     }
     // TODO: override toJSON so that only certain attributes will
     //       be sent up
+});
+
+window.Expense = Backbone.Model.extend({
+    defaults: {
+        "id": null,
+        "description": "",
+        "creator": "",
+        "expense_date": (new Date()).toDateString(),
+        "travelers": [],
+        "value": 0,
+        "currency": ""
+    },
+    parse: function(response) {
+        log('Expense::parse');
+        dates = ["create_date", "expense_date", "modify_date"];
+        for(i in dates) {
+            var date = dates[i];
+            if(response[date]) {
+                response[date] = (Date.fromJSON(response[date])).toDateString();
+            }
+        }
+        return response;
+    }
 });
 
 window.TripCollection = Backbone.Collection.extend({
@@ -55,6 +87,21 @@ window.TripCollection = Backbone.Collection.extend({
         log('TripCollection::parse');
         for(i in response) {
             Trip.prototype.parse(response[i]);
+        }
+        return response;
+    }
+});
+
+window.ExpenseCollection = Backbone.Collection.extend({
+    model: Expense,
+    initialize: function(models, args) {
+        log('ExpenseCollection::initialize');
+    },
+    // URL must be set by the instantiator
+    parse: function(response) {
+        log('ExpenseCollection::parse');
+        for(i in response) {
+            Expense.prototype.parse(response[i]);
         }
         return response;
     }
