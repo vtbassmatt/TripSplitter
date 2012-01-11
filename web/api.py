@@ -458,9 +458,13 @@ class ExpenseHandler(webapp2.RequestHandler):
             
         self.response.out.write(output)
     
-    #def put(self, trip_key):
-    #    TODO: allow updates
-    #    pass
+    def put(self, trip_key, expense_key):
+        #TODO: allow updates
+        pass
+
+    def delete(self, trip_key, expense_key):
+        #TODO: allow deletes
+        pass
 
 class Unpacker:
     """Handles unpacking of POST and PUT request data into a Python object"""
