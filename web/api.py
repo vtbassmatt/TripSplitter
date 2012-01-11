@@ -458,61 +458,9 @@ class ExpenseHandler(webapp2.RequestHandler):
             
         self.response.out.write(output)
     
-    def get(self, trip_key, expense_key):
-        errors = []
-        output = ""
-        user = users.get_current_user()
-        authz = Authz(user)
-        self.response.headers["Content-type"] = "application/json"
-
-        try:
-            # get the trip
-            trip = Trip.get(trip_key)
-            
-            # verify the user is authorized to read the trip
-            authz.readTrip(trip)
-            
-        except db.BadKeyError:
-            errors.append({"message":"Invalid trip key"})
-        except PermissionError:
-            errors.append({"message":"You are not authorized to view that trip"})            
-        except Exception as e:
-            logging.exception(e)
-            errors.append({"message":"Unexpected error loading trip"})
-        
-        # if errors encountered so far, bail
-        if len(errors) > 0:
-            self.response.set_status(400);
-            output = json.dumps({"error":errors})
-            self.response.out.write(output)
-            return
-        
-        # next, get the expense
-        try:
-            expense = Expense.get(expense_key)
-            
-            # format expense data
-            output = GqlEncoder().encode(expense)
-                
-        except db.BadKeyError:
-            errors.append({"message":"Invalid expense key"})
-        except Exception as e:
-            logging.exception(e)
-            errors.append({"message":"Unexpected error loading expense"})
-        
-        if len(errors) > 0:
-            self.response.set_status(400);
-            output = json.dumps({"errors":errors})
-        
-        self.response.out.write(output)
-
-    def put(self, trip_key, expense_key):
-        #TODO: allow updates
-        pass
-    
-    def delete(self, trip_key, expense_key):
-        #TODO: allow deletes
-        pass
+    #def put(self, trip_key):
+    #    TODO: allow updates
+    #    pass
 
 class Unpacker:
     """Handles unpacking of POST and PUT request data into a Python object"""
