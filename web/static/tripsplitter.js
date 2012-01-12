@@ -152,6 +152,19 @@ window.ExpenseListView = Backbone.View.extend({
     }
 });
 
+window.UnsavedTripExpenseListView = Backbone.View.extend({
+    render: function(eventName) {
+        log('UnsavedTripExpenseListView::render');
+        $(this.el).empty().html("First, save the trip. Then you can add expenses.");
+        return this;
+    },
+    close: function() {
+        log('UnsavedTripExpenseListView::close');
+        $(this.el).unbind();
+        $(this.el).empty();
+    }
+});
+
 window.TripListItemView = Backbone.View.extend({
     tagName: "li",
     
@@ -214,8 +227,14 @@ window.TripView = Backbone.View.extend({
         log('TripView::render');
         $(this.el).html(this.template(this.model.toJSON()));
         
-        if(!this.model.isNew()) {
-            if(app.expenseListView) app.expenseListView.close();
+        if(app.expenseListView) app.expenseListView.close();
+
+        if(this.model.isNew()) {
+            app.expenseListView = new UnsavedTripExpenseListView({
+                el: $('#expenseList')
+            });
+            app.expenseListView.render();
+        } else {
             var self = this;
             this.model.expenses.fetch({
                 success: function() {
