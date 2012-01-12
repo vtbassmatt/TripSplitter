@@ -49,7 +49,7 @@ window.Trip = Backbone.Model.extend({
         this.expenses = new ExpenseCollection();
         var self = this;
         this.expenses.url = function() { 
-            if(self.id) return '/api/trip/' + self.id + '/expenses';
+            if(self.id) return '/api/trip/' + self.id + '/expense';
             throw "Trip must be fetched or saved before expenses URL is valid";
         }
     }
@@ -127,6 +127,30 @@ window.TripListView = Backbone.View.extend({
     }
 });
 
+window.ExpenseListView = Backbone.View.extend({
+    initialize: function() {
+        log('ExpenseListView::initialize');
+        $(this.el).empty();
+        this.model.bind('reset', this.render, this);
+        this.model.bind('add', function(expense) {
+            $('#expenseList').append(
+                new ExpenseListItemView({model: expense}).render().el);
+        });
+    },
+    render: function(eventName) {
+        log('ExpenseListView::render');
+        _.each(this.model.models, function(expense) {
+            $(this.el).append(new ExpenseListItemView({model: expense}).render().el);
+        }, this);
+        return this;
+    },
+    close: function() {
+        log('ExpenseListView::close');
+        $(this.el).unbind();
+        $(this.el).empty();
+    }
+});
+
 window.TripListItemView = Backbone.View.extend({
     tagName: "li",
     
@@ -151,6 +175,30 @@ window.TripListItemView = Backbone.View.extend({
     }
 });
 
+window.ExpenseListItemView = Backbone.View.extend({
+    tagName: "li",
+    
+    template: _.template($('#expense-list-item').html()),
+
+    initialize: function() {
+        log('ExpenseListItemView::initialize');
+        this.model.bind("change", this.render, this);
+        this.model.bind("destroy", this.close, this);
+    },
+    
+    render: function(eventName) {
+        log('ExpenseListItemView::render');
+        $(this.el).html(this.template(this.model.toJSON()));
+        return this;
+    },
+    
+    close: function() {
+        log('ExpenseListItemView::close');
+        $(this.el).unbind();
+        $(this.el).remove();
+    }
+});
+
 window.TripView = Backbone.View.extend({
     el: $('#mainArea'),
     
@@ -164,6 +212,23 @@ window.TripView = Backbone.View.extend({
     render: function(eventName) {
         log('TripView::render');
         $(this.el).html(this.template(this.model.toJSON()));
+        
+        if(!this.model.isNew()) {
+            if(app.expenseListView) app.expenseListView.close();
+            var self = this;
+            this.model.expenses.fetch({
+                success: function() {
+                    log('TripView::render$expenses.fetch$success');
+                    app.expenseListView =
+                        new ExpenseListView({
+                            model: self.model.expenses,
+                            el: $('#expenseList')
+                        });
+                    app.expenseListView.render();
+                }
+            });
+        }
+
         return this;
     },
     
