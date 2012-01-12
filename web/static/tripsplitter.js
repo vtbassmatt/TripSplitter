@@ -128,9 +128,10 @@ window.TripListView = Backbone.View.extend({
 });
 
 window.ExpenseListView = Backbone.View.extend({
+    template_header: _.template($('#expense-list-header').html()),
     initialize: function() {
         log('ExpenseListView::initialize');
-        $(this.el).empty();
+        $(this.el).empty().html(this.template_header());
         this.model.bind('reset', this.render, this);
         this.model.bind('add', function(expense) {
             $('#expenseList').append(
@@ -176,7 +177,7 @@ window.TripListItemView = Backbone.View.extend({
 });
 
 window.ExpenseListItemView = Backbone.View.extend({
-    tagName: "li",
+    tagName: "tr",
     
     template: _.template($('#expense-list-item').html()),
 

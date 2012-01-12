@@ -25,7 +25,7 @@
     </script>
     
     <script type="text/template" id="trip-list-item">
-        <li><a href='#trips/<%= id %>'><%= name %></a></li>
+        <a href='#trips/<%= id %>'><%= name %></a>
     </script>
     
     <script type="text/template" id="trip-details">
@@ -53,16 +53,23 @@
         </div>
         
         <div class="form-right-col">
-            <ul id="expenseList"></ul>
+            <table id="expenseList"></table>
         </div>
     </script>
     
+    <script type="text/template" id="expense-list-header">
+        <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Cost</th>
+        </tr>
+    </script>
+
+
     <script type="text/template" id="expense-list-item">
-        <li>
-            <a href='#trips/FIXME/expenses/<%= id %>'>
-            <%= description %>: $<%= value %>
-            </a>
-        </li>
+        <td><%= expense_date %></td>
+        <td><%= description %></td>
+        <td>$<%= value %></td>
     </script>
     
     <script src="{{ tripsplitter_js }}"></script>
