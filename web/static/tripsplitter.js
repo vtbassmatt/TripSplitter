@@ -366,6 +366,7 @@ var AppRouter = Backbone.Router.extend({
                 self.tripListView = new TripListView({model: self.tripList});
                 self.tripListView.render();
                 if(self.requestedId) self.tripDetails(self.requestedId);
+                delete self.requestedId;
             }
         });
     },
