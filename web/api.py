@@ -357,7 +357,7 @@ class ExpenseListHandler(webapp2.RequestHandler):
         data = ExpenseUnpacker().unpack_post(self.request)
 
         if data['description'] == "" or data['value'] == "" or data['payer'] == "":
-            errors.append({"message":"Description name, value, and payer are required."})
+            errors.append({"message":"Description, value, and payer are required."})
         elif len(data['travelers']) == 0:
             errors.append({"message":"At least one person must be specified as a traveler."})
         else:            

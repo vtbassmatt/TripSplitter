@@ -63,6 +63,7 @@ window.Expense = Backbone.Model.extend({
         "description": "",
         "creator": "",
         "expense_date": (new Date()).toDateString(),
+        "payer": "",
         "travelers": [],
         "value": 0,
         "currency": ""
@@ -129,6 +130,7 @@ window.TripListView = Backbone.View.extend({
 
 window.ExpenseListView = Backbone.View.extend({
     template_header: _.template($('#expense-list-header').html()),
+    template_footer: _.template($('#expense-list-footer').html()),
     initialize: function() {
         log('ExpenseListView::initialize');
         $(this.el).empty().html(this.template_header());
@@ -137,6 +139,7 @@ window.ExpenseListView = Backbone.View.extend({
             $('#expenseList').append(
                 new ExpenseListItemView({model: expense}).render().el);
         });
+        $(this.el).append(this.template_footer());
     },
     render: function(eventName) {
         log('ExpenseListView::render');
@@ -149,6 +152,90 @@ window.ExpenseListView = Backbone.View.extend({
         log('ExpenseListView::close');
         $(this.el).unbind();
         $(this.el).empty();
+    },
+    events: {
+        "click .newexpense": "newExpense"
+    },
+    
+    newExpense: function(event) {
+        log('ExpenseListView::newExpense');
+        var the_model = new Expense;
+        app.newExpenseView = new NewExpenseView({
+            el: $('#newExpense'),
+            model: new Expense
+        });
+        app.newExpenseView.render();
+        return false;
+    }
+});
+
+window.NewExpenseView = Backbone.View.extend({
+    template:  _.template($('#new-expense-list-item').html()),
+    initialize: function() {
+        log('NewExpenseView::initialize');
+        $(this.el).empty().html(this.template(this.model.toJSON()));
+        this.model.bind('reset', this.render, this);
+    },
+    close: function() {
+        log('NewExpenseView::close');
+        $(this.el).unbind();
+        $(this.el).empty();
+    },
+    events: {
+        "click .saveexpense": "saveExpense",
+        "change input": "changeExpense"
+    },
+    
+    saveExpense: function(event) {
+        log('NewExpenseView::saveExpense');
+        
+        if (this.model.isNew()) {
+            log("the model is new");
+            var self = this;
+            app.tripView.model.expenses.create(this.model, {
+                'success' : function() {
+                    // close the edit window
+                    self.close();
+                },
+                'error'   : function(model, response){
+                    errStr = "Error " +response.status +
+                    ": " + response.responseText;
+                    alert(errStr);
+                }
+            });
+        } else {
+            log("the model is not new");
+            this.model.save({
+                'success': function() {
+                    // close the edit window
+                    this.close();
+                },
+                'error': function(model, response) {
+                    errStr = "Error " +response.status +
+                    ": " + response.responseText;
+                    alert(errStr);
+                }
+            });
+        }
+        
+        return false;
+    },
+    
+    changeExpense: function(event) {
+        log('NewExpenseView::change');
+        var target = event.target;
+        log('changing ' + target.id + ' from "'
+            + target.defaultValue + '" to "' + target.value + '"');
+        // change model directly
+        var target = event.target;
+        var change = {};
+        if(target.id == 'travelers') {
+            change[target.id] = target.value.split(",");
+        } else {
+            change[target.id] = target.value;
+        }
+        this.model.set(change);
+        return false;
     }
 });
 
@@ -265,7 +352,7 @@ window.TripView = Backbone.View.extend({
             + target.defaultValue + '" to "' + target.value + '"');
         // could change model on the spot here
         // var change = {};
-        // change[target.name] = target.value;
+        // change[target.id] = target.value;
         // this.model.set(change);
     },
     

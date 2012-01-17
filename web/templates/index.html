@@ -54,6 +54,7 @@
         
         <div class="form-right-col">
             <table id="expenseList"></table>
+            <div id="newExpense"></div>
         </div>
     </script>
     
@@ -65,11 +66,35 @@
         </tr>
     </script>
 
-
     <script type="text/template" id="expense-list-item">
         <td><%= expense_date %></td>
         <td><%= description %></td>
         <td>$<%= value %></td>
+    </script>
+    
+    <script type="text/template" id="expense-list-footer">
+        <tfoot><tr>
+            <td colspan="3"><button class="newexpense">New Expense</button></td>
+        </tr></tfoot>
+    </script>
+
+    <script type="text/template" id="new-expense-list-item">
+        <label>Date:</label>
+        <input type="text" id="expense_date" value="<%= expense_date %>" />
+        
+        <label>Description</label>
+        <input type="text" id="description" value="<%= description %>" />
+        
+        <label>Cost</label>
+        $<input type="text" id="value" value="<%= value %>" />
+        
+        <label>Payer</label>
+        <input type="text" id="payer" value="<%= payer %>" />
+        
+        <label>Travelers</label>
+        <input type="text" id="travelers" value="<%= travelers %>" />
+        
+        <button class="saveexpense">Save</button>
     </script>
     
     <script src="{{ tripsplitter_js }}"></script>
