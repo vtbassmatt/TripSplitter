@@ -297,6 +297,26 @@ window.ExpenseListItemView = Backbone.View.extend({
         log('ExpenseListItemView::close');
         $(this.el).unbind();
         $(this.el).remove();
+    },
+    
+    events: {
+        "click .deleteexpense": "deleteExpense"
+    },
+    
+    deleteExpense: function(event) {
+        log('ExpenseListItemView::deleteExpense');
+        var self = this;
+        this.model.destroy({
+            'success': function() {
+                alert('Expense deleted');
+            },
+            'error'   : function(model, response){
+                errStr = "Error " +response.status +
+                ": " + response.responseText;
+                alert(errStr);
+            }
+        });
+        return false;
     }
 });
 

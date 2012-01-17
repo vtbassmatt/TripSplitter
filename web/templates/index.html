@@ -63,6 +63,7 @@
             <th>Date</th>
             <th>Description</th>
             <th>Cost</th>
+            <th></th>
         </tr>
     </script>
 
@@ -70,11 +71,12 @@
         <td><%= expense_date %></td>
         <td><%= description %></td>
         <td>$<%= value %></td>
+        <td><button class="deleteexpense">del</button></td>
     </script>
     
     <script type="text/template" id="expense-list-footer">
         <tfoot><tr>
-            <td colspan="3"><button class="newexpense">New Expense</button></td>
+            <td colspan="4"><button class="newexpense">New Expense</button></td>
         </tr></tfoot>
     </script>
 
