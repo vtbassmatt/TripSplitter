@@ -229,8 +229,8 @@ window.NewExpenseView = Backbone.View.extend({
         // change model directly
         var target = event.target;
         var change = {};
-        if(target.id == 'travelers') {
-            change[target.id] = target.value.split(",");
+        if(target.id == 'expensetravelers') {
+            change['travelers'] = target.value.split(",");
         } else {
             change[target.id] = target.value;
         }
