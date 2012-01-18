@@ -8,7 +8,7 @@ import logging
 from google.appengine.api import users
 from google.appengine.ext import db
 
-from models import Trip, Expense
+from models import Trip, Expense, TripAccess
 
 class Authz():
     """Authorization manager.  Member methods allow other aspects of the
@@ -31,12 +31,19 @@ class Authz():
     
     def listTrips(self):
         """Give back a list of trips the user can read"""
-        # TODO: authorized users can see more trips than just their own
-        trips = Trip.all()
-        trips.filter('owner = ', self.user)
+        # pull 10 of the user's own trips
+        my_trips_query = Trip.all()
+        my_trips_query.filter('owner = ', self.user)        
+        my_trips = my_trips_query.fetch(limit=10)
         
-        # return 10 trips to the user
-        return trips.fetch(limit=10)
+        # pull 10 more trips the user can read
+        tripaccess_query = TripAccess.all()
+        tripaccess_query.filter('user = ', self.user)
+        tripaccess = tripaccess_query.fetch(limit=10)
+        for access in tripaccess:
+            my_trips.append(access.trip)
+        
+        return my_trips
     
     def readTrip(self, trip):
         """Determines whether the user is allowed to read a particular trip
@@ -49,7 +56,15 @@ class Authz():
             trip = Trip.get(trip)
         
         # logic determining whether the user can read the trip
+        # if the user is the owner, OK
         if self.user == trip.owner:
+            return
+        # if there is a TripAccess object, OK
+        tripaccess_query = TripAccess.all()
+        tripaccess_query.filter('user = ', self.user)
+        tripaccess_query.filter('trip = ', trip)
+        tripaccess = tripaccess_query.fetch(limit=10)
+        if len(tripaccess) > 0:
             return
         
         raise PermissionError('User not allowed to read this trip')
@@ -71,7 +86,15 @@ class Authz():
             trip = Trip.get(trip)
         
         # logic determining whether the user can update the trip
+        # if the user is the owner, OK
         if self.user == trip.owner:
+            return
+        # if there is a TripAccess object, OK
+        tripaccess_query = TripAccess.all()
+        tripaccess_query.filter('user = ', self.user)
+        tripaccess_query.filter('trip = ', trip)
+        tripaccess = tripaccess_query.fetch(limit=10)
+        if len(tripaccess) > 0:
             return
         
         raise PermissionError('User not allowed to update this trip')

@@ -26,3 +26,7 @@ class Expense(db.Model):
     value = db.IntegerProperty(required=True)
     currency = db.StringProperty(required=True)
     travelers = db.StringListProperty()
+
+class TripAccess(db.Model):
+    user = db.UserProperty(required=True)
+    trip = db.ReferenceProperty(Trip)
