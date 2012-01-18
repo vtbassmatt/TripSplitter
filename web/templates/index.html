@@ -30,9 +30,6 @@
     
     <script type="text/template" id="trip-details">
         <div class="form-left-col">
-            <label>Key:</label>
-            <input id="tripId" name="id" type="text" value="<%= id %>" disabled />
-            
             <label>Name:</label>
             <input type="text" id="name" value="<%= name %>" required/>
             
@@ -69,7 +66,8 @@
 
     <script type="text/template" id="expense-list-item">
         <td><%= expense_date %></td>
-        <td><%= description %></td>
+        <td><%= description %><br />
+        <span class="sharedby"><%= travelers %></span></td>
         <td>$<%= value %></td>
         <td><button class="deleteexpense">del</button></td>
     </script>
@@ -97,6 +95,12 @@
         <input type="text" id="expensetravelers" value="<%= travelers %>" />
         
         <button class="saveexpense">Save</button>
+
+        <script language="javascript">
+        // default a new expense to have the trip travelers
+        // this probably should live in tripsplitter.js somewhere
+        $('#expensetravelers').val($('#travelers').val());
+        </script>
     </script>
     
     <script src="{{ tripsplitter_js }}"></script>

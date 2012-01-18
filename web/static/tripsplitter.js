@@ -66,7 +66,7 @@ window.Expense = Backbone.Model.extend({
         "payer": "",
         "travelers": [],
         "value": 0,
-        "currency": ""
+        "currency": "---"
     },
     parse: function(response) {
         log('Expense::parse');

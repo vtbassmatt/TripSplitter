@@ -80,3 +80,11 @@ label {
 button {
 	padding:6px;
 }
+
+th {
+    text-align: left;
+}
+
+.sharedby {
+    font-size: 50%;
+}
