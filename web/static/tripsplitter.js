@@ -159,7 +159,6 @@ window.ExpenseListView = Backbone.View.extend({
     
     newExpense: function(event) {
         log('ExpenseListView::newExpense');
-        var the_model = new Expense;
         app.newExpenseView = new NewExpenseView({
             el: $('#newExpense'),
             model: new Expense
