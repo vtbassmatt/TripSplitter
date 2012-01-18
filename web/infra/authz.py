@@ -133,8 +133,13 @@ class Authz():
             trip = Trip.get(expense.parent_key())
         except db.BadKeyError:
             raise PermissionError('User cannot delete this expense because the trip could not be loaded')
-            
+        
+        # if yes, they are allowed to delete the expense
         if self.user == trip.owner:
+            return
+        
+        # if they own the expense itself, then they can delete it
+        if self.user == expense.creator:
             return
 
         raise PermissionError('User cannot delete this expense')
