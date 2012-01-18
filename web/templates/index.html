@@ -95,12 +95,6 @@
         <input type="text" id="expensetravelers" value="<%= travelers %>" />
         
         <button class="saveexpense">Save</button>
-
-        <script language="javascript">
-        // default a new expense to have the trip travelers
-        // this probably should live in tripsplitter.js somewhere
-        $('#expensetravelers').val($('#travelers').val());
-        </script>
     </script>
     
     <script src="{{ tripsplitter_js }}"></script>

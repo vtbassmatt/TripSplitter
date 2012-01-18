@@ -249,11 +249,19 @@ class TripHandler(webapp2.RequestHandler):
             # verify the user is authorized to delete the trip
             authz.deleteTrip(trip)
             
+            # delete related expenses
+            try:
+                expenses = Expense.all()
+                expenses.ancestor(trip)
+                expenses.fetch(limit=200)
+                db.delete(expenses)
+            except Exception as e:
+                logging.exception(e)
+                errors.append({"message":"Unexpected error deleting associated expenses"})
+                
             # delete the trip
             trip.delete()
             
-            # TODO: delete related expenses
-                
         except db.BadKeyError:
             errors.append({"message":"Invalid trip key"})
         except PermissionError:

@@ -163,6 +163,8 @@ window.ExpenseListView = Backbone.View.extend({
             el: $('#newExpense'),
             model: new Expense
         });
+        // default the new expense to have the trip travelers
+        app.newExpenseView.model.set({"travelers": $('#travelers').val().split(",")});
         app.newExpenseView.render();
         return false;
     }
@@ -174,6 +176,12 @@ window.NewExpenseView = Backbone.View.extend({
         log('NewExpenseView::initialize');
         $(this.el).empty().html(this.template(this.model.toJSON()));
         this.model.bind('reset', this.render, this);
+    },
+    render: function()
+    {
+        log('NewExpenseView::render');
+        $(this.el).html(this.template(this.model.toJSON()));
+        return this;
     },
     close: function() {
         log('NewExpenseView::close');
