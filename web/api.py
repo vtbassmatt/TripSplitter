@@ -23,14 +23,16 @@ from config import Config
 
 class TripListHandler(webapp2.RequestHandler):
     def get(self):
-        # TODO: bring this in line with the other handler methods
+
         errors = []
         output = ""
+        user = users.get_current_user()
+        authz = Authz(user)
+        self.response.headers["Content-type"] = "application/json"
         
         try:
             # determine what trips to show this user
             # TODO: authorized users can see more trips than just their own
-            user = users.get_current_user()
             trips = Trip.all()
             trips.filter('owner = ', user)
             
@@ -44,7 +46,6 @@ class TripListHandler(webapp2.RequestHandler):
             self.response.set_status(400);
             output = json.dumps({"error":errors})
         
-        self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
 
     def post(self):
@@ -122,7 +123,6 @@ class TripListHandler(webapp2.RequestHandler):
             self.response.set_status(400);
             output = json.dumps({"error":errors})
 
-        self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
     
 class TripHandler(webapp2.RequestHandler):
