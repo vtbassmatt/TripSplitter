@@ -29,8 +29,8 @@ window.Trip = Backbone.Model.extend({
         "id": null,
         "name": "",
         "password": "",
-        "start_date": (new Date()).toDateString(),
-        "end_date": (new Date()).toDateString(),
+        "start_date": (new Date()).toLocaleDateString(),
+        "end_date": (new Date()).toLocaleDateString(),
         "travelers": []
     },
     parse: function(response) {
@@ -39,7 +39,7 @@ window.Trip = Backbone.Model.extend({
         for(i in dates) {
             var date = dates[i];
             if(response[date]) {
-                response[date] = (Date.fromJSON(response[date])).toDateString();
+                response[date] = (Date.fromJSON(response[date])).toLocaleDateString();
             }
         }
         return response;
@@ -62,7 +62,7 @@ window.Expense = Backbone.Model.extend({
         "id": null,
         "description": "",
         "creator": "",
-        "expense_date": (new Date()).toDateString(),
+        "expense_date": (new Date()).toLocaleDateString(),
         "payer": "",
         "travelers": [],
         "value": 0,
@@ -74,7 +74,7 @@ window.Expense = Backbone.Model.extend({
         for(i in dates) {
             var date = dates[i];
             if(response[date]) {
-                response[date] = (Date.fromJSON(response[date])).toDateString();
+                response[date] = (Date.fromJSON(response[date])).toLocaleDateString();
             }
         }
         return response;
