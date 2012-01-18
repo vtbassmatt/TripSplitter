@@ -29,6 +29,15 @@ class Authz():
         # could block people out entirely here - simply raise PermissionError
         return
     
+    def listTrips(self):
+        """Give back a list of trips the user can read"""
+        # TODO: authorized users can see more trips than just their own
+        trips = Trip.all()
+        trips.filter('owner = ', self.user)
+        
+        # return 10 trips to the user
+        return trips.fetch(limit=10)
+    
     def readTrip(self, trip):
         """Determines whether the user is allowed to read a particular trip
         

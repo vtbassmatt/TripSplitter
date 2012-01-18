@@ -31,13 +31,11 @@ class TripListHandler(webapp2.RequestHandler):
         self.response.headers["Content-type"] = "application/json"
         
         try:
-            # determine what trips to show this user
-            # TODO: authorized users can see more trips than just their own
-            trips = Trip.all()
-            trips.filter('owner = ', user)
+            # get the list of trips to show the user
+            trips = authz.listTrips()
             
-            # return 10 trips to the user
-            output = GqlEncoder().encode(trips.fetch(limit=10))
+            # return trips to the user
+            output = GqlEncoder().encode(trips)
         except Exception as e:
             logging.exception(e)
             errors.append({"message":"Unexpected error listing trips"})
