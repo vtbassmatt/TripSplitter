@@ -138,6 +138,7 @@ window.ExpenseListView = Backbone.View.extend({
         this.model.bind('add', function(expense) {
             $('#expenseList').append(
                 new ExpenseListItemView({model: expense}).render().el);
+            return false;
         });
         $(this.el).append(this.template_footer());
     },

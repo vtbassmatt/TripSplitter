@@ -402,7 +402,6 @@ class ExpenseListHandler(webapp2.RequestHandler):
             self.response.set_status(400);
             output = json.dumps({"error":errors})
 
-        self.response.headers["Content-type"] = "application/json"
         self.response.out.write(output)
         
 class ExpenseHandler(webapp2.RequestHandler):
