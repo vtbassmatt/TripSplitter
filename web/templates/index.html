@@ -6,97 +6,125 @@
     <script src="{{ jquery_js }}"></script>
     <script src="{{ json2_js }}"></script>
     <script src="{{ backbone_js }}"></script>
-    <link rel="stylesheet" href="{{ index_css }}" />
+    <link rel="stylesheet" href="{{ bootstrap_css }}" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-    <div class="header">
-    </div>
-    
-    <div class="leftArea">
-        <ul id="tripList"></ul>
-    </div>
-    
-    <div id="mainArea"></div>
-    
-    <script type="text/template" id="header">
-        <button class="home">Home</button>
-        <button class="new">New Trip</button>
-    </script>
-    
-    <script type="text/template" id="trip-list-item">
-        <a href='#trips/<%= id %>'><%= name %></a>
-    </script>
-    
-    <script type="text/template" id="trip-details">
-        <div class="form-left-col">
-            <label>Name:</label>
-            <input type="text" id="name" value="<%= name %>" required/>
-            
-            <label>Password:</label>
-            <input type="text" id="password" value="<%= password %>" required/>
-            
-            <label>Start Date:</label>
-            <input type="text" id="start_date" value="<%= start_date %>" />
-            
-            <label>End Date:</label>
-            <input type="text" id="end_date" value="<%= end_date %>" />
-            
-            <label>Travelers:</label>
-            <input type="text" id="travelers" value="<%= travelers %>" />
-            
-            <button class="save">Save</button>
-            <button class="delete">Delete</button>
-        </div>
-        
-        <div class="form-right-col">
-            <table id="expenseList"></table>
-            <div id="newExpense"></div>
-        </div>
-    </script>
-    
-    <script type="text/template" id="expense-list-header">
-        <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Cost</th>
-            <th></th>
-        </tr>
-    </script>
+    <style type="text/css">
+      /* Override some defaults */
+      html, body {
+        background-color: #eee;
+      }
+      body {
+        padding-top: 40px; /* 40px to make the container go all the way to the bottom of the topbar */
+      }
+      .container > footer p {
+        text-align: center; /* center align it with the container */
+      }
+      .container {
+        width: 820px; /* downsize our container to make the content feel a bit tighter and more cohesive. NOTE: this removes two full columns from the grid, meaning you only go to 14 columns and not 16. */
+      }
 
-    <script type="text/template" id="expense-list-item">
-        <td><%= expense_date %></td>
-        <td><%= description %><br />
-        <span class="sharedby"><%= travelers %></span></td>
-        <td>$<%= value %></td>
-        <td><button class="deleteexpense">del</button></td>
-    </script>
-    
-    <script type="text/template" id="expense-list-footer">
-        <tfoot><tr>
-            <td colspan="4"><button class="newexpense">New Expense</button></td>
-        </tr></tfoot>
-    </script>
+      /* The white background content wrapper */
+      .container > .content {
+        background-color: #fff;
+        padding: 20px;
+        margin: 0 -20px; /* negative indent the amount of the padding to maintain the grid system */
+        -webkit-border-radius: 0 0 6px 6px;
+           -moz-border-radius: 0 0 6px 6px;
+                border-radius: 0 0 6px 6px;
+        -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+           -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+                box-shadow: 0 1px 2px rgba(0,0,0,.15);
+      }
 
-    <script type="text/template" id="new-expense-list-item">
-        <label>Date:</label>
-        <input type="text" id="expense_date" value="<%= expense_date %>" />
-        
-        <label>Description</label>
-        <input type="text" id="description" value="<%= description %>" />
-        
-        <label>Cost</label>
-        $<input type="text" id="value" value="<%= value %>" />
-        
-        <label>Payer</label>
-        <input type="text" id="payer" value="<%= payer %>" />
-        
-        <label>Travelers</label>
-        <input type="text" id="expensetravelers" value="<%= travelers %>" />
-        
-        <button class="saveexpense">Save</button>
-    </script>
-    
-    <script src="{{ tripsplitter_js }}"></script>
-</body>
+      /* Page header tweaks */
+      .page-header {
+        background-color: #f5f5f5;
+        padding: 20px 20px 10px;
+        margin: -20px -20px 20px;
+      }
+
+      /* Styles you shouldn't keep as they are for displaying this base example only */
+      .content .span10,
+      .content .span4 {
+        min-height: 500px;
+      }
+      /* Give a quick and non-cross-browser friendly divider */
+      .content .span4 {
+        margin-left: 0;
+        padding-left: 19px;
+        border-left: 1px solid #eee;
+      }
+
+      .topbar .btn {
+        border: 0;
+      }
+      
+    </style>
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="images/apple-touch-icon-114x114.png">
+  </head>
+
+  <body>
+
+    <div class="topbar">
+      <div class="fill">
+        <div class="container">
+          <a class="brand" href="#">TripSplitter</a>
+          <ul class="nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+          <form action="" class="pull-right">
+            <input class="input-small" type="text" placeholder="Username">
+            <input class="input-small" type="password" placeholder="Password">
+            <button class="btn" type="submit">Sign in</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="content">
+        <div class="page-header">
+          <h1>Trips <small>come up with a tagline</small></h1>
+        </div>
+        <div class="row">
+          <div class="span10">
+            <h2>Hawaii: &ldquo;<em>MauiFun!</em>&rdquo;</h2>
+            <h3>May 19 - 28, 2012</h3>
+            <div>
+              Matt, Christy, Jeremy, and Jess
+            </div>
+            <hr/>
+          </div>
+          <div class="span4">
+            <h3>All trips</h3>
+            <dl>
+              <dt><a href="#" class="btn info">Hawaii</a></dt>
+                <dd>May 19 - 28, 2012</dd>
+                <dd>Matt, Christy, Jeremy, Jess</dd>
+              <dt><a href="#" class="btn">Beer Festival</a></dt>
+                <dd>October 1 - 2, 2012</dd>
+                <dd>Matt, Christy</dd>
+            </dl>
+            <button class="btn primary">New Trip</button>
+          </div>
+        </div>
+      </div>
+
+      <footer>
+        <p>&copy; 2012 Matt Cooper</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    <!--script src="{{ tripsplitter_js }}"></script-->
+
+  </body>
 </html>

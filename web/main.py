@@ -44,7 +44,7 @@ class AppHandler(webapp2.RequestHandler):
             'json2_js': static_dir + 'json2.js',
             'backbone_js': static_dir + backbone,
             'tripsplitter_js': static_dir + 'tripsplitter.js',
-            'index_css': static_dir + 'index.css',
+            'bootstrap_css': 'http://twitter.github.com/bootstrap/1.4.0/bootstrap.min.css',
         }
     
     def get(self):
