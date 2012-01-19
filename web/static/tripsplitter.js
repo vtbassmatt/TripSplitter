@@ -23,6 +23,7 @@ Date.fromJSON = function(json_obj) {
     return d;
 };
 
+/*
 window.Trip = Backbone.Model.extend({
     urlRoot: "/api/trip",
     defaults: {
@@ -515,3 +516,32 @@ var AppRouter = Backbone.Router.extend({
 var app = new AppRouter();
 Backbone.history.start();
 var header = new HeaderView();
+*/
+
+var App = function() {
+
+    var AppRouter = Backbone.Router.extend({
+        routes: {
+            ""          : "home",
+            "contact"   : "contact",
+            "about"     : "about",
+            "help"      : "help",
+            "trip/:id"  : "trip"
+        },
+        
+        home: function() { log("AppRouter::home"); },
+        
+        contact: function() { log("AppRouter::contact"); },
+        
+        about: function() { log("AppRouter::about"); },
+        
+        help: function() { log("AppRouter::help"); },
+        
+        trip: function(id) { log("AppRouter::trip"); },
+        
+    });
+    
+    var router = new AppRouter();
+    Backbone.history.start();
+
+}();
