@@ -58,6 +58,9 @@
       .topbar .btn {
         border: 0;
       }
+      td small {
+        font-size: 80%;
+      }
       
     </style>
 
@@ -96,12 +99,65 @@
         </div>
         <div class="row">
           <div class="span10">
-            <h2>Hawaii: &ldquo;<em>MauiFun!</em>&rdquo;</h2>
+            <h2>Hawaii: &ldquo;<em>MauiFun!</em>&rdquo; <a class="btn success small" href="#">share</a> <a class="btn small" href="#">edit</a></h2>
             <h3>May 19 - 28, 2012</h3>
             <div>
               Matt, Christy, Jeremy, and Jess
             </div>
-            <hr/>
+            <hr />
+            <h3>Expenses</h3>
+            <table class="zebra-striped">
+              <thead>
+                <tr>
+                  <th>Expense</th>
+                  <th>Cost</th>
+                  <th>Payer</th>
+                  <th>Players</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Condo<br/><small>December 18, 2011</small></td>
+                  <td>$2200</td>
+                  <td>Matt</td>
+                  <td>Matt, Christy, Jeremy, and Jess</td>
+                  <td>
+                    <a href="#" class="btn small danger">remove</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Car<br/><small>December 18, 2011</small></td>
+                  <td>$300</td>
+                  <td>Jeremy</td>
+                  <td>Matt, Christy, Jeremy, and Jess</td>
+                  <td>
+                    <a href="#" class="btn small danger">remove</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Airfare<br/><small>December 23, 2011</small></td>
+                  <td>$2600</td>
+                  <td>Matt</td>
+                  <td>Matt, Christy, Jeremy, and Jess</td>
+                  <td>
+                    <a href="#" class="btn small danger">remove</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>Drinks<br/><small>May 19, 2012</small></td>
+                  <td>$35</td>
+                  <td>Jess</td>
+                  <td>Christy and Jess</td>
+                  <td>
+                    <a href="#" class="btn small danger">remove</a>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr><td colspan="5"><a class="btn primary" href="#">New Expense</a></td></tr>
+              </tfoot>
+            </table>
           </div>
           <div class="span4">
             <h3>All trips</h3>
