@@ -27,6 +27,7 @@ var Convenience = function() {
 
 var App = function() {
 
+    /// AboutView
     var AboutView = Backbone.View.extend({
         template: _.template($('#about-content').html()),
         
@@ -37,6 +38,7 @@ var App = function() {
         }
     });
     
+    /// HelpView
     var HelpView = Backbone.View.extend({
         template: _.template($('#help-content').html()),
         
@@ -47,6 +49,7 @@ var App = function() {
         }
     });
     
+    /// ContactView
     var ContactView = Backbone.View.extend({
         template: _.template($('#contact-content').html()),
         
@@ -57,6 +60,7 @@ var App = function() {
         }
     });
     
+    /// TripsView
     var TripsView = Backbone.View.extend({
         template: _.template($('#trips-content').html()),
         
@@ -67,6 +71,7 @@ var App = function() {
         }
     });
     
+    /// NavbarView
     var NavbarView = Backbone.View.extend({
         el: $(".nav"),
         
@@ -89,6 +94,7 @@ var App = function() {
         }        
     });
     
+    /// UiView
     var UiView = Backbone.View.extend({
         el: $("#contentpane"),
 
@@ -126,7 +132,8 @@ var App = function() {
             this.content.render();
         }
     });
-
+    
+    /// AppRouter
     var AppRouter = Backbone.Router.extend({
         routes: {
             "trip/:id"  : "trip",
@@ -169,6 +176,7 @@ var App = function() {
         displayErrorMessage({"error":[{"message":error_message}]});
     };
     
+    /// aaaaaand go!
     var uiView = new UiView();
     var router = new AppRouter();
     Backbone.history.start();
