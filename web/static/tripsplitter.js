@@ -72,15 +72,48 @@ var App = {};
         }
     });
     
+    // NavbarItem
+    app.NavbarItem = Backbone.Model.extend({});
+    
+    /// NavbarItemView
+    app.NavbarItemView = Backbone.View.extend({
+        model: new app.NavbarItem,
+        
+        template: _.template($('#navbar-item-content').html()),
+        
+        initialize: function() {
+            log('NavbarItemView::initialize');
+            return this;
+        },
+        
+        render: function() {
+            log('NavbarItemView::render');
+            $(this.el).html(this.template(this.model.toJSON()));
+            return this;
+        }
+    });
+    
     /// NavbarView
     app.NavbarView = Backbone.View.extend({
         el: $(".nav"),
         
-        template: _.template($('#navbar-content').html()),
-        
         initialize: function() {
             log('NavbarView::initialize');
-            $(this.el).html(this.template());
+            
+            $(this.el).empty();
+            
+            _.each(["Trips","About","Contact","Help"],function(item){
+                $(this.el).append(
+                    new app.NavbarItemView({
+                        el: this.make("li"),
+                        model: new app.NavbarItem({
+                            link:item.toLowerCase(),
+                            name:item
+                        })
+                    })
+                .render().el);
+            },this);
+            
             return this;
         },
         
@@ -107,6 +140,9 @@ var App = {};
             this.navbar = new app.NavbarView;
             this.navbar.render();
             return this;
+            
+            // TODO: have the UiView pass the list of content panes
+            // into the app and the navbar
         },
         
         // select a UI pane
