@@ -1,27 +1,29 @@
-// usage: log('inside coolFunc',this,arguments);
-// http://paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
-window.log = function(){
-  log.history = log.history || [];   // store logs to an array for reference
-  log.history.push(arguments);
-  if(this.console){
-    console.log( Array.prototype.slice.call(arguments) );
-  }
-};
-
-// extend date to handle the dates which come down from the server
-Date.prototype.fromJSON = function(json_obj) {
-    if(json_obj.year)  this.setYear(json_obj.year);
-    // fun fact: JS months count from 0
-    if(json_obj.month) this.setMonth(json_obj.month - 1);
-    if(json_obj.day)   this.setDate(json_obj.day);
-};
-
-// and a "class" method for building dates from JSON directly
-Date.fromJSON = function(json_obj) {
-    d = new Date();
-    d.fromJSON(json_obj);
-    return d;
-};
+var Convenience = function() {
+    // usage: log('inside coolFunc',this,arguments);
+    // http://paulirish.com/2009/log-a-lightweight-wrapper-for-consolelog/
+    window.log = function(){
+      log.history = log.history || [];   // store logs to an array for reference
+      log.history.push(arguments);
+      if(this.console){
+        console.log( Array.prototype.slice.call(arguments) );
+      }
+    };
+    
+    // extend date to handle the dates which come down from the server
+    Date.prototype.fromJSON = function(json_obj) {
+        if(json_obj.year)  this.setYear(json_obj.year);
+        // fun fact: JS months count from 0
+        if(json_obj.month) this.setMonth(json_obj.month - 1);
+        if(json_obj.day)   this.setDate(json_obj.day);
+    };
+    
+    // and a "class" method for building dates from JSON directly
+    Date.fromJSON = function(json_obj) {
+        d = new Date();
+        d.fromJSON(json_obj);
+        return d;
+    };
+}();
 
 var App = function() {
 
