@@ -25,11 +25,6 @@ Date.fromJSON = function(json_obj) {
 
 var App = function() {
 
-    var Ui = {
-        // top navigation bar
-        navBar: $(".nav")
-    };
-    
     var AboutView = Backbone.View.extend({
         template: _.template($('#about-content').html()),
         
