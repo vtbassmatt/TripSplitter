@@ -70,25 +70,44 @@ var App = function() {
         }
     });
     
+    var NavbarView = Backbone.View.extend({
+        el: $(".nav"),
+        
+        template: _.template($('#navbar-content').html()),
+        
+        initialize: function() {
+            log('NavbarView::initialize');
+            $(this.el).html(this.template());
+            return this;
+        },
+        
+        // select the navbar item which should be active
+        chooseActiveNavbar: function(link) {
+            log('NavbarView::chooseActiveNavbar('+link+')');
+            $(this.el).children("li.active").toggleClass("active", false);
+            $(this.el).children("li").children('a[href="#'+link+'"]')
+                .parent().toggleClass("active", true);
+            this.render();
+            return this;
+        }        
+    });
+    
     var UiView = Backbone.View.extend({
         el: $("#contentpane"),
 
         initialize: function() {
             log('UiView::initialize');
+            // main content pane - initialization triggered by the AppRouter
+            this.content = null;
+            // top navigation bar
+            this.navbar = new NavbarView;
+            this.navbar.render();
             return this;
         },
         
-        // select the navbar item which should be active
-        _chooseActiveNavbar: function(link) {
-            Ui.navBar.children("li.active").toggleClass("active", false);
-            Ui.navBar.children("li").children('a[href="'+link+'"]')
-                .parent().toggleClass("active", true);
-            return this;
-        },
-        
-        // show the selected UI pane
-        _showUi: function(page) {
-            log('UiView::showUi');
+        // select a UI pane
+        show: function(page) {
+            log('UiView::show');
             var content_el = $(this.el).children(".content").first();
             switch(page) {
                 case "trips":
@@ -106,16 +125,8 @@ var App = function() {
                 default:
                     triggerFatalError("No UI pane to show");
             }
+            this.navbar.chooseActiveNavbar(page);
             this.content.render();
-
-            return this;
-        },
-        
-        // public method for selecting a UI pane
-        show: function(uipane) {
-            log('UiView::show');
-            this._chooseActiveNavbar("#"+uipane)
-                ._showUi(uipane);
         }
     });
 
