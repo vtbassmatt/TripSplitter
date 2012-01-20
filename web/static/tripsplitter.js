@@ -155,7 +155,7 @@ var App = function() {
     });
     
     // todo: change this into some kind of nice popover
-    var handleFatalError = function(errors) {
+    var displayErrorMessage = function(errors) {
         if(errors.error) {
             alert(errors.error[0].message);
         } else {
@@ -164,8 +164,12 @@ var App = function() {
     };
     
     var triggerFatalError = function(error_message) {
-        handleFatalError({"error":[{"message":error_message}]});
+        triggerNonfatalError(error_message);
         throw "_STOP_";
+    };
+    
+    var triggerNonfatalError = function(error_message) {
+        displayErrorMessage({"error":[{"message":error_message}]});
     };
     
     var uiView = new UiView();
