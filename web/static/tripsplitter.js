@@ -520,28 +520,92 @@ var header = new HeaderView();
 
 var App = function() {
 
-    var AppRouter = Backbone.Router.extend({
-        routes: {
-            ""          : "home",
-            "contact"   : "contact",
-            "about"     : "about",
-            "help"      : "help",
-            "trip/:id"  : "trip"
+    var Ui = {
+        // top navigation bar
+        navBar: $(".nav"),
+        // main UI panes
+        trips: $("#trips"),
+        about: $("#about"),
+        contact: $("#contact"),
+        help: $("#help")
+    };
+    
+    var UiView = Backbone.View.extend({
+        el: $("#contentpane"),
+
+        initialize: function() {
+            log('UiView::initialize');
+            return this;
         },
         
-        home: function() { log("AppRouter::home"); },
+        // select the navbar item which should be active
+        _chooseActiveNavbar: function(link) {
+            Ui.navBar.children("li.active").toggleClass("active", false);
+            Ui.navBar.children("li").children('a[href="'+link+'"]')
+                .parent().toggleClass("active", true);
+            return this;
+        },
         
-        contact: function() { log("AppRouter::contact"); },
+        // hide all the UI panes
+        _hideAllUi: function() {
+            log('UiView::hideAllUi');
+            Ui.trips  .toggleClass("hide", true);
+            Ui.about  .toggleClass("hide", true);
+            Ui.contact.toggleClass("hide", true);
+            Ui.help   .toggleClass("hide", true);
+            return this;
+        },
         
-        about: function() { log("AppRouter::about"); },
+        // reveal only the selected UI pane
+        _showUi: function(page) {
+            log('UiView::showUi');
+            Ui[page].toggleClass("hide", false);
+            return this;
+        },
         
-        help: function() { log("AppRouter::help"); },
+        // public method for selecting a UI pane
+        show: function(uipane) {
+            log('UiView::show');
+            this._chooseActiveNavbar("#"+uipane)
+                ._hideAllUi()
+                ._showUi(uipane);
+        }
+    });
+
+    var AppRouter = Backbone.Router.extend({
+        routes: {
+            "trip/:id"  : "trip",
+            // this goes last since it catches all unmatched routes
+            ":uipane"   : "showUi"
+        },
         
-        trip: function(id) { log("AppRouter::trip"); },
+        showUi: function(uipane) {
+            log("AppRouter::showUi("+uipane+")");
+            if(_.include(["trips", "contact", "about", "help"], uipane)) {
+                uiView.show(uipane);
+            } else if(uipane == "") {
+                this.navigate("trips", true)
+            } else {
+                handleFatalError({"error":[{"message":"Unmatched route: " + uipane}]});
+            }
+        },
+        
+        trip: function(id) {
+            log("AppRouter::trip");
+        },
         
     });
     
+    // todo: change this into some kind of nice popover
+    var handleFatalError = function(errors) {
+        if(errors.error) {
+            alert(errors.error[0].message);
+        } else {
+            alert(errors.toString());
+        }
+    };
+    
+    var uiView = new UiView();
     var router = new AppRouter();
     Backbone.history.start();
-
 }();
