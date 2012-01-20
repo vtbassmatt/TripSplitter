@@ -86,7 +86,7 @@
         <div class="container">
           <a class="brand" href="#">TripSplitter</a>
           <ul class="nav">
-            <li class="active"><a href="#">Trips</a></li>
+            <li class="active"><a href="#trips">Trips</a></li>
             <li><a href="#about">About</a></li>
             <li><a href="#contact">Contact</a></li>
             <li><a href="#help">Help</a></li>
@@ -101,8 +101,9 @@
     </div>
 
     <div class="container" id="contentpane">
-
-      <div class="content hide" id="trips">
+      <div class="content"></div>
+      
+      <script type="text/template" id="trips-content">
         <div class="page-header">
           <h1>Trips <small>come up with a tagline</small></h1>
         </div>
@@ -214,9 +215,9 @@
             <button class="btn primary">New Trip</button>
           </div>
         </div>
-      </div>
+      </script>
 
-      <div class="content hide" id="about">
+      <script type="text/template" id="about-content">
         <div class="page-header">
           <h1>About</h1>
         </div>
@@ -225,9 +226,9 @@
             <h2>About</h2>
           </div>
         </div>
-      </div>
+      </script>
 
-      <div class="content hide" id="contact">
+      <script type="text/template" id="contact-content">
         <div class="page-header">
           <h1>Contact</h1>
         </div>
@@ -236,9 +237,9 @@
             <h2>Contact</h2>
           </div>
         </div>
-      </div>
+      </script>
 
-      <div class="content hide" id="help">
+      <script type="text/template" id="help-content">
         <div class="page-header">
           <h1>Help</h1>
         </div>
@@ -247,7 +248,7 @@
             <h2>Help</h2>
           </div>
         </div>
-      </div>
+      </script>
 
       <footer>
         <p>&copy; 2012 Matt Cooper</p>

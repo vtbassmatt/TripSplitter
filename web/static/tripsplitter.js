@@ -27,13 +27,48 @@ var App = function() {
 
     var Ui = {
         // top navigation bar
-        navBar: $(".nav"),
-        // main UI panes
-        trips: $("#trips"),
-        about: $("#about"),
-        contact: $("#contact"),
-        help: $("#help")
+        navBar: $(".nav")
     };
+    
+    var AboutView = Backbone.View.extend({
+        template: _.template($('#about-content').html()),
+        
+        initialize: function() {
+            log('AboutView::initialize');
+            $(this.el).html(this.template());
+            return this;
+        }
+    });
+    
+    var HelpView = Backbone.View.extend({
+        template: _.template($('#help-content').html()),
+        
+        initialize: function() {
+            log('HelpView::initialize');
+            $(this.el).html(this.template());
+            return this;
+        }
+    });
+    
+    var ContactView = Backbone.View.extend({
+        template: _.template($('#contact-content').html()),
+        
+        initialize: function() {
+            log('ContactView::initialize');
+            $(this.el).html(this.template());
+            return this;
+        }
+    });
+    
+    var TripsView = Backbone.View.extend({
+        template: _.template($('#trips-content').html()),
+        
+        initialize: function() {
+            log('TripsView::initialize');
+            $(this.el).html(this.template());
+            return this;
+        }
+    });
     
     var UiView = Backbone.View.extend({
         el: $("#contentpane"),
@@ -51,20 +86,28 @@ var App = function() {
             return this;
         },
         
-        // hide all the UI panes
-        _hideAllUi: function() {
-            log('UiView::hideAllUi');
-            Ui.trips  .toggleClass("hide", true);
-            Ui.about  .toggleClass("hide", true);
-            Ui.contact.toggleClass("hide", true);
-            Ui.help   .toggleClass("hide", true);
-            return this;
-        },
-        
-        // reveal only the selected UI pane
+        // show the selected UI pane
         _showUi: function(page) {
             log('UiView::showUi');
-            Ui[page].toggleClass("hide", false);
+            var content_el = $(this.el).children(".content").first();
+            switch(page) {
+                case "trips":
+                    this.content = new TripsView({el: content_el});
+                    break;
+                case "about":
+                    this.content = new AboutView({el: content_el});
+                    break;
+                case "contact":
+                    this.content = new ContactView({el: content_el});
+                    break;
+                case "help":
+                    this.content = new HelpView({el: content_el});
+                    break;
+                default:
+                    triggerFatalError("No UI pane to show");
+            }
+            this.content.render();
+
             return this;
         },
         
@@ -72,7 +115,6 @@ var App = function() {
         show: function(uipane) {
             log('UiView::show');
             this._chooseActiveNavbar("#"+uipane)
-                ._hideAllUi()
                 ._showUi(uipane);
         }
     });
@@ -91,7 +133,7 @@ var App = function() {
             } else if(uipane == "") {
                 this.navigate("trips", true)
             } else {
-                handleFatalError({"error":[{"message":"Unmatched route: " + uipane}]});
+                triggerFatalError("Unmatched route: " + uipane);
             }
         },
         
@@ -108,6 +150,11 @@ var App = function() {
         } else {
             alert(errors.toString());
         }
+    };
+    
+    var triggerFatalError = function(error_message) {
+        handleFatalError({"error":[{"message":error_message}]});
+        throw "_STOP_";
     };
     
     var uiView = new UiView();
