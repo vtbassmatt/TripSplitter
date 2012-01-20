@@ -25,10 +25,11 @@ var Convenience = function() {
     };
 }();
 
-var App = function() {
+var App = {};
+(function(app) {
 
     /// AboutView
-    var AboutView = Backbone.View.extend({
+    app.AboutView = Backbone.View.extend({
         template: _.template($('#about-content').html()),
         
         initialize: function() {
@@ -39,7 +40,7 @@ var App = function() {
     });
     
     /// HelpView
-    var HelpView = Backbone.View.extend({
+    app.HelpView = Backbone.View.extend({
         template: _.template($('#help-content').html()),
         
         initialize: function() {
@@ -50,7 +51,7 @@ var App = function() {
     });
     
     /// ContactView
-    var ContactView = Backbone.View.extend({
+    app.ContactView = Backbone.View.extend({
         template: _.template($('#contact-content').html()),
         
         initialize: function() {
@@ -61,7 +62,7 @@ var App = function() {
     });
     
     /// TripsView
-    var TripsView = Backbone.View.extend({
+    app.TripsView = Backbone.View.extend({
         template: _.template($('#trips-content').html()),
         
         initialize: function() {
@@ -72,7 +73,7 @@ var App = function() {
     });
     
     /// NavbarView
-    var NavbarView = Backbone.View.extend({
+    app.NavbarView = Backbone.View.extend({
         el: $(".nav"),
         
         template: _.template($('#navbar-content').html()),
@@ -95,7 +96,7 @@ var App = function() {
     });
     
     /// UiView
-    var UiView = Backbone.View.extend({
+    app.UiView = Backbone.View.extend({
         el: $("#contentpane"),
 
         initialize: function() {
@@ -103,7 +104,7 @@ var App = function() {
             // main content pane - initialization triggered by the AppRouter
             this.content = null;
             // top navigation bar
-            this.navbar = new NavbarView;
+            this.navbar = new app.NavbarView;
             this.navbar.render();
             return this;
         },
@@ -114,16 +115,16 @@ var App = function() {
             var content_el = $(this.el).children(".content").first();
             switch(page) {
                 case "trips":
-                    this.content = new TripsView({el: content_el});
+                    this.content = new app.TripsView({el: content_el});
                     break;
                 case "about":
-                    this.content = new AboutView({el: content_el});
+                    this.content = new app.AboutView({el: content_el});
                     break;
                 case "contact":
-                    this.content = new ContactView({el: content_el});
+                    this.content = new app.ContactView({el: content_el});
                     break;
                 case "help":
-                    this.content = new HelpView({el: content_el});
+                    this.content = new app.HelpView({el: content_el});
                     break;
                 default:
                     triggerFatalError("No UI pane to show");
@@ -134,7 +135,7 @@ var App = function() {
     });
     
     /// AppRouter
-    var AppRouter = Backbone.Router.extend({
+    app.AppRouter = Backbone.Router.extend({
         routes: {
             "trip/:id"  : "trip",
             // this goes last since it catches all unmatched routes
@@ -144,7 +145,7 @@ var App = function() {
         showUi: function(uipane) {
             log("AppRouter::showUi("+uipane+")");
             if(_.include(["trips", "contact", "about", "help"], uipane)) {
-                uiView.show(uipane);
+                app.uiView.show(uipane);
             } else if(uipane == "") {
                 this.navigate("trips", true)
             } else {
@@ -177,7 +178,7 @@ var App = function() {
     };
     
     /// aaaaaand go!
-    var uiView = new UiView();
-    var router = new AppRouter();
+    app.uiView = new app.UiView();
+    app.router = new app.AppRouter();
     Backbone.history.start();
-}();
+}(App));
