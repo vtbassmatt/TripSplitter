@@ -28,6 +28,38 @@ var Convenience = function() {
 var App = {};
 (function(app) {
 
+    app.Trip = Backbone.Model.extend({
+        urlRoot: "/api/trip",
+        defaults: {
+            "id": null,
+            "name": "",
+            "password": "",
+            "start_date": (new Date()).toLocaleDateString(),
+            "end_date": (new Date()).toLocaleDateString(),
+            "travelers": []
+        },
+        parse: function(response) {
+            log('Trip::parse');
+            dates = ["create_date", "end_date", "modify_date", "start_date"];
+            for(i in dates) {
+                var date = dates[i];
+                if(response[date]) {
+                    response[date] = (Date.fromJSON(response[date])).toLocaleDateString();
+                }
+            }
+            return response;
+        },
+        initialize: function() {
+            log('Trip::initialize');
+            /*this.expenses = new ExpenseCollection();
+            var self = this;
+            this.expenses.url = function() { 
+                if(self.id) return '/api/trip/' + self.id + '/expense';
+                throw "Trip must be fetched or saved before expenses URL is valid";
+            }*/
+        }
+    });
+
     /// AboutView
     app.AboutView = Backbone.View.extend({
         template: _.template($('#about-content').html()),
