@@ -60,45 +60,45 @@ var App = {};
         }
     });
 
-    /// AboutView
-    app.AboutView = Backbone.View.extend({
+    /// AboutPane
+    app.AboutPane = Backbone.View.extend({
         template: _.template($('#about-content').html()),
         
         initialize: function() {
-            log('AboutView::initialize');
+            log('AboutPane::initialize');
             $(this.el).html(this.template());
             return this;
         }
     });
     
-    /// HelpView
-    app.HelpView = Backbone.View.extend({
+    /// HelpPane
+    app.HelpPane = Backbone.View.extend({
         template: _.template($('#help-content').html()),
         
         initialize: function() {
-            log('HelpView::initialize');
+            log('HelpPane::initialize');
             $(this.el).html(this.template());
             return this;
         }
     });
     
-    /// ContactView
-    app.ContactView = Backbone.View.extend({
+    /// ContactPane
+    app.ContactPane = Backbone.View.extend({
         template: _.template($('#contact-content').html()),
         
         initialize: function() {
-            log('ContactView::initialize');
+            log('ContactPane::initialize');
             $(this.el).html(this.template());
             return this;
         }
     });
     
-    /// TripsView
-    app.TripsView = Backbone.View.extend({
+    /// TripsPane
+    app.TripsPane = Backbone.View.extend({
         template: _.template($('#trips-content').html()),
         
         initialize: function() {
-            log('TripsView::initialize');
+            log('TripsPane::initialize');
             $(this.el).html(this.template());
             return this;
         }
@@ -178,26 +178,26 @@ var App = {};
         },
         
         // select a UI pane
-        show: function(page) {
+        show: function(pane) {
             log('UiView::show');
             var content_el = $(this.el).children(".content").first();
-            switch(page) {
+            switch(pane) {
                 case "trips":
-                    this.content = new app.TripsView({el: content_el});
+                    this.content = new app.TripsPane({el: content_el});
                     break;
                 case "about":
-                    this.content = new app.AboutView({el: content_el});
+                    this.content = new app.AboutPane({el: content_el});
                     break;
                 case "contact":
-                    this.content = new app.ContactView({el: content_el});
+                    this.content = new app.ContactPane({el: content_el});
                     break;
                 case "help":
-                    this.content = new app.HelpView({el: content_el});
+                    this.content = new app.HelpPane({el: content_el});
                     break;
                 default:
                     triggerFatalError("No UI pane to show");
             }
-            this.navbar.chooseActiveNavbar(page);
+            this.navbar.chooseActiveNavbar(pane);
             this.content.render();
         }
     });
