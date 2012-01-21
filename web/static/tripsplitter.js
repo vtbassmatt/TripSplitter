@@ -28,6 +28,7 @@ var Convenience = function() {
 var App = {};
 (function(app) {
 
+    /// Trip (model)
     app.Trip = Backbone.Model.extend({
         urlRoot: "/api/trip",
         defaults: {
@@ -59,6 +60,20 @@ var App = {};
             }*/
         }
     });
+    
+    /// TripCollection
+    app.TripCollection = Backbone.Collection.extend({
+        model: app.Trip,
+        url: '/api/trip',
+        parse: function(response) {
+            log('TripCollection::parse');
+            for(i in response) {
+                app.Trip.prototype.parse(response[i]);
+            }
+            return response;
+        }
+    });
+
 
     /// AboutPane
     app.AboutPane = Backbone.View.extend({
@@ -93,6 +108,23 @@ var App = {};
         }
     });
     
+    /// TripListView
+    app.TripListView = Backbone.View.extend({
+        template: _.template($('#trip-list-content').html()),
+        
+        initialize: function() {
+            log('TripListView::initialize');
+            this.el = $('#tripList');
+            return this;
+        },
+        
+        render: function() {
+            log('TripListView::render');
+            $(this.el).html(this.template());
+            return this;
+        }
+    });
+    
     /// TripsPane
     app.TripsPane = Backbone.View.extend({
         template: _.template($('#trips-content').html()),
@@ -100,6 +132,13 @@ var App = {};
         initialize: function() {
             log('TripsPane::initialize');
             $(this.el).html(this.template());
+            this.tripListView = new app.TripListView();
+            return this;
+        },
+        
+        render: function() {
+            log('TripsPane::render');
+            this.tripListView.render();
             return this;
         }
     });
