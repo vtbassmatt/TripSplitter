@@ -209,15 +209,14 @@
       
       <script type="text/template" id="trip-list-content">
         <h3>All trips</h3>
-        <dl>
-          <dt><a href="#" class="btn info">Hawaii</a></dt>
-            <dd>May 19 - 28, 2012</dd>
-            <dd>Matt, Christy, Jeremy, Jess</dd>
-          <dt><a href="#" class="btn">Beer Festival</a></dt>
-            <dd>October 1 - 2, 2012</dd>
-            <dd>Matt, Christy</dd>
-        </dl>
+        <dl></dl>
         <button class="btn primary">New Trip</button>
+      </script>
+      
+      <script type="text/template" id="trip-list-item-content">
+          <dt><a href="#" class="btn"><%- name %></a></dt>
+            <dd><%- pretty_date %></dd>
+            <dd><%- pretty_travelers %></dd>      
       </script>
 
       <script type="text/template" id="about-content">

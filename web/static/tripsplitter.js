@@ -23,6 +23,22 @@ var Convenience = function() {
         d.fromJSON(json_obj);
         return d;
     };
+    
+    // some date naming magic
+    Date.prototype.getMonthName = function() {
+        return ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+                'August', 'September', 'October', 'November', 'December'][this.getMonth()];
+    };
+    
+    // compare two dates
+    Date.prototype.isSameDateAs = function(otherDate) {
+        if(this.getDate() == otherDate.getDate()
+            && this.getFullYear() == otherDate.getFullYear()
+            && this.getMonth() == otherDate.getMonth()) {
+            return true;
+        }
+        return false;
+    };
 }();
 
 var App = {};
@@ -35,8 +51,8 @@ var App = {};
             "id": null,
             "name": "",
             "password": "",
-            "start_date": (new Date()).toLocaleDateString(),
-            "end_date": (new Date()).toLocaleDateString(),
+            "start_date": (new Date()),
+            "end_date": (new Date()),
             "travelers": []
         },
         parse: function(response) {
@@ -45,7 +61,7 @@ var App = {};
             for(i in dates) {
                 var date = dates[i];
                 if(response[date]) {
-                    response[date] = (Date.fromJSON(response[date])).toLocaleDateString();
+                    response[date] = (Date.fromJSON(response[date]));
                 }
             }
             return response;
@@ -58,6 +74,53 @@ var App = {};
                 if(self.id) return '/api/trip/' + self.id + '/expense';
                 throw "Trip must be fetched or saved before expenses URL is valid";
             }*/
+        },
+        
+        prettyDateRange: function() {
+            var start_date = this.get('start_date');
+            var end_date = this.get('end_date');
+            
+            // single-day trip
+            if(start_date.isSameDateAs(end_date)) {
+                return start_date.toLocaleDateString();
+            // trip within the same month
+            } else if(start_date.getFullYear() == end_date.getFullYear()
+                && start_date.getMonth() == end_date.getMonth()) {
+                return start_date.getMonthName() + " " + start_date.getDate()
+                        + " - " + end_date.getDate() + ", " + start_date.getFullYear();
+            // trip within the same year
+            } else if(start_date.getFullYear() == end_date.getFullYear()) {
+                return start_date.getMonthName() + " " + start_date.getDate()
+                        + " - "
+                        + end_date.getMonthName() + " " + end_date.getDate()
+                        + ", " + start_date.getFullYear();
+            // trip spanning a year boundary
+            } else {
+                return start_date.getMonthName() + " " + start_date.getDate()
+                        + ", " + start_date.getFullYear()
+                        + " - "
+                        + end_date.getMonthName() + " " + end_date.getDate()
+                        + ", " + end_date.getFullYear();
+            }
+        },
+        
+        prettyTravelers: function() {
+            var travelers = this.get('travelers');
+            
+            switch(travelers.count) {
+                case 0:
+                    return "nobody";
+                case 1:
+                    return travelers[0];
+                case 2:
+                    return travelers[0] + " & " + travelers[1];
+            }
+            
+            var trav_str = "and " + travelers[travelers.length - 1];
+            for(var i = travelers.length - 2; i >= 0; i--) {
+                trav_str = travelers[i] + ", " + trav_str
+            }
+            return trav_str;
         }
     });
     
@@ -108,6 +171,25 @@ var App = {};
         }
     });
     
+    /// TripListItemView
+    app.TripListItemView = Backbone.View.extend({
+        template: _.template($('#trip-list-item-content').html()),
+        
+        initialize: function() {
+            log('TripListItemView::initialize');
+            return this;
+        },
+        
+        render: function() {
+            log('TripListItemView::render');
+            var tripJSON = this.model.toJSON();
+            tripJSON.pretty_date = this.model.prettyDateRange();
+            tripJSON.pretty_travelers = this.model.prettyTravelers();
+            $(this.el).html(this.template(tripJSON));
+            return this;
+        }
+    });
+    
     /// TripListView
     app.TripListView = Backbone.View.extend({
         template: _.template($('#trip-list-content').html()),
@@ -115,12 +197,20 @@ var App = {};
         initialize: function() {
             log('TripListView::initialize');
             this.el = $('#tripList');
+            var self = this;
+            this.model.bind('add', function(trip) {
+                $(self.el).append(
+                    new TripListItemView({model: trip}).render().el);
+            });
             return this;
         },
         
         render: function() {
             log('TripListView::render');
             $(this.el).html(this.template());
+            _.each(this.model.models, function(trip) {
+                $(this.el).children('dl').first().append(new app.TripListItemView({model: trip}).render().el);
+            }, this);
             return this;
         }
     });
@@ -132,13 +222,23 @@ var App = {};
         initialize: function() {
             log('TripsPane::initialize');
             $(this.el).html(this.template());
-            this.tripListView = new app.TripListView();
+            this.tripList = new app.TripCollection();
+            var self = this;
+            this.tripList.fetch({
+                success: function() {
+                    log('TripsPane::initialize - tripList.fetch::success');
+                    self.tripListView = new app.TripListView({model: self.tripList});
+                    self.tripListView.render();
+                }
+            });
             return this;
         },
         
         render: function() {
             log('TripsPane::render');
-            this.tripListView.render();
+            if(this.tripListView) {
+                this.tripListView.render();
+            }
             return this;
         }
     });
